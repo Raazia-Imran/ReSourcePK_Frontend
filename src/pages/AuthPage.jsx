@@ -81,7 +81,8 @@ export default function AuthPage({ mode }) {
       ) : (
         <form onSubmit={submit} className="auth-form">
           {isSignup && (
-            <div className="segmented" role="group" aria-label="Account type">
+            <fieldset className="segmented">
+              <legend className="sr-only">Account type</legend>
               <button
                 type="button"
                 className={accountType === "buyer" ? "active" : ""}
@@ -96,7 +97,7 @@ export default function AuthPage({ mode }) {
               >
                 Seller
               </button>
-            </div>
+            </fieldset>
           )}
           {isSignup && (
             <FormField
@@ -148,7 +149,7 @@ export default function AuthPage({ mode }) {
               {error}
             </div>
           )}
-          <button className="button button--wide" disabled={busy}>
+          <button type="submit" className="button button--wide" disabled={busy}>
             {busy ? "Working…" : copy.submit}
           </button>
         </form>

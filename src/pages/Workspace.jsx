@@ -313,7 +313,7 @@ function TeamAccess({ membership }) {
         {Boolean(message) && (
           <div className="notice notice--success">{message}</div>
         )}
-        <button className="button" disabled={busy}>
+        <button type="submit" className="button" disabled={busy}>
           {busy ? "Sending…" : "Send secure invitation"}
         </button>
       </form>

@@ -49,7 +49,9 @@ export default function ResetPassword() {
           {Boolean(error) && (
             <div className="notice notice--error">{error}</div>
           )}
-          <button className="button button--wide">Update password</button>
+          <button type="submit" className="button button--wide">
+            Update password
+          </button>
         </form>
       )}
     </AuthShell>

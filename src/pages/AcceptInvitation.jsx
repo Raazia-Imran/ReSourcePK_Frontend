@@ -84,7 +84,9 @@ export default function AcceptInvitation() {
         )}
         {Boolean(error) && <div className="notice notice--error">{error}</div>}
         {Boolean(details) && (
-          <button className="button button--wide">Accept invitation</button>
+          <button type="submit" className="button button--wide">
+            Accept invitation
+          </button>
         )}
       </form>
     </AuthShell>
