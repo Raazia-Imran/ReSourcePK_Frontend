@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useCallback,
   useEffect,
@@ -27,8 +27,25 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let active = true;
+    api("/auth/refresh", { method: "POST" })
+      .then((data) => {
+        if (!active) return;
+        setAccessToken(data.accessToken);
+        setContext(data.context);
+      })
+      .catch(() => {
+        if (!active) return;
+        setAccessToken(null);
+        setContext(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   const login = useCallback(async (input) => {
     const data = await api("/auth/login", {
       method: "POST",

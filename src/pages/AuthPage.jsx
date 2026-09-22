@@ -5,6 +5,27 @@ import FormField from "../components/FormField";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 
+const copyByMode = {
+  signup: {
+    eyebrow: "Create an account",
+    title: "Choose your place in the loop.",
+    intro: "Buy surplus material or open a verified seller organization.",
+    submit: "Create account",
+  },
+  forgot: {
+    eyebrow: "Account recovery",
+    title: "Reset access securely.",
+    intro: "We will email a one-hour reset link if the account exists.",
+    submit: "Send reset link",
+  },
+  login: {
+    eyebrow: "Welcome back",
+    title: "Continue your work.",
+    intro: "Sign in to your role-aware workspace.",
+    submit: "Sign in",
+  },
+};
+
 export default function AuthPage({ mode }) {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -15,31 +36,37 @@ export default function AuthPage({ mode }) {
   const [done, setDone] = useState("");
   const isSignup = mode === "signup",
     isForgot = mode === "forgot";
+  const copy = copyByMode[mode];
   async function submit(event) {
     event.preventDefault();
     setBusy(true);
     setError("");
     try {
-      if (mode === "login") {
-        await login({ email: state.email, password: state.password });
-        navigate("/workspace");
-      } else if (isForgot) {
-        await api("/auth/forgot-password", {
-          method: "POST",
-          body: JSON.stringify({ email: state.email }),
-        });
-        setDone("If the account exists, a secure reset link is on its way.");
-      } else {
-        const data = await api("/auth/register", {
-          method: "POST",
-          body: JSON.stringify({ ...state, accountType }),
-        });
-        setDone(
-          data.emailDelivery === "sent"
-            ? "Check your inbox to verify your email."
-            : "Your account was created. Email delivery is pending; use resend verification after SMTP is configured.",
-        );
-      }
+      const actions = {
+        login: async () => {
+          await login({ email: state.email, password: state.password });
+          navigate("/workspace");
+        },
+        forgot: async () => {
+          await api("/auth/forgot-password", {
+            method: "POST",
+            body: JSON.stringify({ email: state.email }),
+          });
+          setDone("If the account exists, a secure reset link is on its way.");
+        },
+        signup: async () => {
+          const data = await api("/auth/register", {
+            method: "POST",
+            body: JSON.stringify({ ...state, accountType }),
+          });
+          const message =
+            data.emailDelivery === "sent"
+              ? "Check your inbox to verify your email."
+              : "Your account was created. Email delivery is pending; use resend verification after SMTP is configured.";
+          setDone(message);
+        },
+      };
+      await actions[mode]();
     } catch (e) {
       setError(e.message);
     } finally {
@@ -48,29 +75,7 @@ export default function AuthPage({ mode }) {
   }
   const update = (e) => setState({ ...state, [e.target.name]: e.target.value });
   return (
-    <AuthShell
-      eyebrow={
-        isSignup
-          ? "Create an account"
-          : isForgot
-            ? "Account recovery"
-            : "Welcome back"
-      }
-      title={
-        isSignup
-          ? "Choose your place in the loop."
-          : isForgot
-            ? "Reset access securely."
-            : "Continue your work."
-      }
-      intro={
-        isSignup
-          ? "Buy surplus material or open a verified seller organization."
-          : isForgot
-            ? "We will email a one-hour reset link if the account exists."
-            : "Sign in to your role-aware workspace."
-      }
-    >
+    <AuthShell eyebrow={copy.eyebrow} title={copy.title} intro={copy.intro}>
       {done ? (
         <div className="notice notice--success">{done}</div>
       ) : (
@@ -144,13 +149,7 @@ export default function AuthPage({ mode }) {
             </div>
           )}
           <button className="button button--wide" disabled={busy}>
-            {busy
-              ? "Working…"
-              : isSignup
-                ? "Create account"
-                : isForgot
-                  ? "Send reset link"
-                  : "Sign in"}
+            {busy ? "Working…" : copy.submit}
           </button>
         </form>
       )}

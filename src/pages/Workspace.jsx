@@ -53,15 +53,21 @@ const roleConfig = {
     ],
   },
 };
+const metricLabels = {
+  buyer: ["Active purchases", "Pool commitments", "Recovered value"],
+  organization: ["Published listings", "Open orders", "Recovered value"],
+  platform: ["Active organizations", "Pending reviews", "Verified users"],
+};
+function defaultWorkspace(context) {
+  if (context.platformRoles.length) return "platform";
+  if (context.memberships.length) return "organization";
+  return "buyer";
+}
 export default function Workspace() {
   const { context, logout } = useAuth();
   const [menu, setMenu] = useState(false);
   const [active, setActive] = useState("Overview");
-  const defaultKind = context.platformRoles.length
-    ? "platform"
-    : context.memberships.length
-      ? "organization"
-      : "buyer";
+  const defaultKind = defaultWorkspace(context);
   const [kind, setKind] = useState(defaultKind);
   const availableKinds = [
     "buyer",
@@ -69,6 +75,7 @@ export default function Workspace() {
     ...(context.platformRoles.length ? ["platform"] : []),
   ];
   const config = roleConfig[kind];
+  const [primaryMetric, secondaryMetric, valueMetric] = metricLabels[kind];
   const role =
     kind === "organization"
       ? context.memberships[0].role.replace("_", " ")
@@ -162,27 +169,11 @@ export default function Workspace() {
             <span className="status-pill">Verified account</span>
           </div>
           <div className="metric-grid">
-            <Metric
-              label={
-                kind === "buyer"
-                  ? "Active purchases"
-                  : kind === "organization"
-                    ? "Published listings"
-                    : "Active organizations"
-              }
-            />
-            <Metric
-              label={
-                kind === "buyer"
-                  ? "Pool commitments"
-                  : kind === "organization"
-                    ? "Open orders"
-                    : "Pending reviews"
-              }
-            />
+            <Metric label={primaryMetric} />
+            <Metric label={secondaryMetric} />
             <Metric label="Material diverted" unit="kg" />
             <Metric
-              label={kind === "platform" ? "Verified users" : "Recovered value"}
+              label={valueMetric}
               unit={kind === "platform" ? "" : "PKR"}
             />
           </div>
