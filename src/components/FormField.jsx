@@ -3,7 +3,7 @@ export default function FormField({ label, error, ...props }) {
     <label className="field">
       <span>{label}</span>
       <input aria-invalid={Boolean(error)} {...props} />
-      {error && <small>{error}</small>}
+      {Boolean(error) && <small>{error}</small>}
     </label>
   );
 }

@@ -13,10 +13,18 @@ export default function AcceptInvitation() {
   const [state, setState] = useState({});
   const [error, setError] = useState("");
   useEffect(() => {
-    if (token)
-      api(`/invitations/details?token=${encodeURIComponent(token)}`)
-        .then(setDetails)
-        .catch((e) => setError(e.message));
+    if (!token) return;
+    let active = true;
+    api(`/invitations/details?token=${encodeURIComponent(token)}`)
+      .then((invitation) => {
+        if (active) setDetails(invitation);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.message);
+      });
+    return () => {
+      active = false;
+    };
   }, [token]);
   async function submit(e) {
     e.preventDefault();
@@ -56,7 +64,7 @@ export default function AcceptInvitation() {
       }
     >
       <form className="auth-form" onSubmit={submit}>
-        {!context && details && (
+        {!context && Boolean(details) && (
           <>
             <FormField
               label="Full name"
@@ -74,8 +82,8 @@ export default function AcceptInvitation() {
             />
           </>
         )}
-        {error && <div className="notice notice--error">{error}</div>}
-        {details && (
+        {Boolean(error) && <div className="notice notice--error">{error}</div>}
+        {Boolean(details) && (
           <button className="button button--wide">Accept invitation</button>
         )}
       </form>

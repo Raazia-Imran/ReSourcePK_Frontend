@@ -46,7 +46,9 @@ export default function ResetPassword() {
           <p className="form-hint">
             Use 10+ characters with uppercase, lowercase and a number.
           </p>
-          {error && <div className="notice notice--error">{error}</div>}
+          {Boolean(error) && (
+            <div className="notice notice--error">{error}</div>
+          )}
           <button className="button button--wide">Update password</button>
         </form>
       )}

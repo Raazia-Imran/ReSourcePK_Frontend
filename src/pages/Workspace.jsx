@@ -309,8 +309,10 @@ function TeamAccess({ membership }) {
             Allow this manager to invite staff
           </label>
         )}
-        {error && <div className="notice notice--error">{error}</div>}
-        {message && <div className="notice notice--success">{message}</div>}
+        {Boolean(error) && <div className="notice notice--error">{error}</div>}
+        {Boolean(message) && (
+          <div className="notice notice--success">{message}</div>
+        )}
         <button className="button" disabled={busy}>
           {busy ? "Sending…" : "Send secure invitation"}
         </button>

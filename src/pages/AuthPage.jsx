@@ -143,7 +143,7 @@ export default function AuthPage({ mode }) {
               Use 10+ characters with uppercase, lowercase and a number.
             </p>
           )}
-          {error && (
+          {Boolean(error) && (
             <div className="notice notice--error" role="alert">
               {error}
             </div>
