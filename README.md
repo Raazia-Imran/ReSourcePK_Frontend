@@ -19,3 +19,5 @@ Use `npm run build` for the optimized Vite deployment build. Vercel SPA rewrites
 ## Current catalog verification
 
 Read [Week 2 setup and verification](docs/verification-week-2.md), [delivery status](docs/delivery-status.md) and [catalog ADR 004](docs/adr/004-catalog-completion.md). This UI/API slice needs migrations 004–005 and coordinated deployment; previous sessions must sign in again. Image storage and synthetic seed are explicit optional configuration, not hardcoded data.
+
+Latest scope and API/UI coordination: [Week 2 acceptance ADR 005](docs/adr/005-week-2-acceptance.md).
