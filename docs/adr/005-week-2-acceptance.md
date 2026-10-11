@@ -17,3 +17,5 @@ Use real API-owned sessions and isolated PostgreSQL for browser journeys at 360/
 The staging bucket is private, WebP-only and limited to 5 MB. Hosted acceptance still requires backend storage credentials, real upload/signed-read/delete verification, a scheduled cleanup job and coordinated Vercel deployment. The Vercel connector returned 403; hosted approval is not inferred from passing CI.
 
 No applied migration changes, production fixtures or new runtime dependencies are introduced. The new pinned Playwright and axe dependencies are development-only (Apache-2.0 and MPL-2.0); lifecycle scripts remain disabled during dependency installation.
+
+The auth limiter keeps its existing 12-request/15-minute default and becomes explicitly configurable through `AUTH_REQUESTS_PER_WINDOW` (3–1000). The isolated browser job uses 100 to accommodate repeated logins/refreshes across six widths; production configuration must retain an appropriate abuse-control budget. This is the same real middleware, not mock authentication.

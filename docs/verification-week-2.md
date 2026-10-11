@@ -152,7 +152,7 @@ Locally, clone both repos side by side, create a dedicated local `resourcepk_tes
 npm ci --ignore-scripts
 node scripts/prepare-test-db.js
 npm run db:seed:demo
-npm exec playwright install -- --with-deps chromium
+node node_modules/@playwright/test/cli.js install --with-deps chromium
 # Frontend terminal: set VITE_API_URL=http://localhost:5000/api/v1
 npm ci --ignore-scripts
 npm run build
@@ -165,3 +165,5 @@ Use `E2E_FRONTEND_DIR` when the frontend is not the sibling `frontend` folder. T
 ## Hosted boundary still awaiting acceptance
 
 The connected staging `listing-images` bucket is private, limited to WebP and 5 MB. Configure the three storage variables in the backend host directly, restore Vercel team access (the connector returned 403), deploy the coordinated branches after review, then perform the real upload/signed read/delete and schedule/monitor cleanup. Configure Gmail for clean-account signup/invitation verification. Never place service credentials in frontend variables or commit them.
+
+For the repeated local browser suite set `AUTH_REQUESTS_PER_WINDOW=100`; normal application use retains the default 12 requests per 15 minutes. CI uses this isolated test budget without changing production values.

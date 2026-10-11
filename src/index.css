@@ -968,6 +968,9 @@ footer p {
 .workspace-brand .brand {
   color: #fff;
 }
+.workspace-brand .brand em {
+  color: var(--acid);
+}
 .workspace-brand button {
   display: none;
 }
@@ -1097,7 +1100,7 @@ footer p {
 .user-chip small {
   font-size: 0.65rem;
   text-transform: capitalize;
-  color: #777;
+  color: #625d69;
 }
 .workspace-menu {
   display: none;
@@ -1137,7 +1140,7 @@ footer p {
   margin: 0 0 10px;
 }
 .welcome > div > p:last-child {
-  color: #ded6ff;
+  color: #fff;
   max-width: 620px;
   line-height: 1.6;
 }
@@ -1174,7 +1177,7 @@ footer p {
 }
 .metric small {
   font-size: 0.62rem;
-  color: #98939d;
+  color: #66616d;
 }
 .empty-panel {
   margin-top: 18px;
