@@ -1,7 +1,11 @@
 @import "@fontsource-variable/manrope";
 @import "@fontsource-variable/bricolage-grotesque";
 :root {
-  --catalog-border: rgba(25, 65, 49, 0.2);
+  --catalog-border: rgba(23, 23, 32, 0.15);
+  --surface: #fffdf8;
+  --muted: #625d69;
+  --shadow-surface: 0 8px 28px rgba(23, 23, 32, 0.045);
+  --shadow-raised: 0 12px 32px rgba(23, 23, 32, 0.09);
   --ink: #171720;
   --paper: #f3f0e8;
   --cream: #fffaf0;
@@ -27,7 +31,9 @@ body {
   font-size: 16px;
 }
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 a {
@@ -1147,7 +1153,7 @@ footer p {
 .workspace {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 270px 1fr;
+  grid-template-columns: 270px minmax(0, 1fr);
   background: #f4f1e9;
 }
 .workspace-nav {
@@ -2403,7 +2409,7 @@ footer p {
 
 .payment-return-card h1 {
   margin: 10px 0;
-  font-family: var(--display-font, inherit);
+  font-family: var(--display);
   font-size: clamp(32px, 5vw, 52px);
   line-height: 1.02;
 }
@@ -2418,5 +2424,466 @@ footer p {
 @media (max-width: 640px) {
   .checkout-form {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Shared operational UI. Keep marketing compositions independent of portal layout. */
+.button {
+  max-width: 100%;
+  padding-block: 12px;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.button svg {
+  flex-shrink: 0;
+}
+.button--quiet {
+  background: var(--cream);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+.button--quiet:hover:not(:disabled) {
+  background: #ece5ff;
+  border-color: var(--violet);
+  box-shadow: 0 4px 12px rgba(109, 57, 255, 0.08);
+}
+.button:disabled {
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+:where(
+    .workspace-body,
+    .marketplace-page,
+    .seller-onboarding,
+    .payment-return-page
+  )
+  .button {
+  min-height: 44px;
+  border-radius: 12px;
+  gap: 8px;
+  padding: 11px 18px;
+  font-size: 0.82rem;
+  box-shadow: 0 3px 0 rgba(23, 23, 32, 0.1);
+}
+:where(
+    .workspace-body,
+    .marketplace-page,
+    .seller-onboarding,
+    .payment-return-page
+  )
+  .button--quiet {
+  box-shadow: none;
+}
+:where(
+  .field,
+  .field-control,
+  .auth-card,
+  .auth-panel,
+  .workspace-body,
+  .workspace-kind span,
+  .purchase-form,
+  .checkout-form,
+  .team-panel > *,
+  .reviewer-invite-form > *,
+  .data-page-heading > *,
+  .data-panel-heading > *,
+  .catalog-filters > *,
+  .listing-form > *
+) {
+  min-width: 0;
+}
+.field {
+  align-content: start;
+}
+.field > label,
+.field > span:first-child {
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.5;
+}
+.field :is(input, select, textarea) {
+  color: var(--ink);
+  background-color: var(--surface);
+  max-width: 100%;
+}
+.field textarea,
+.start-selling .field textarea {
+  width: 100%;
+  min-height: 112px;
+  padding: 14px 15px;
+  border: 1px solid #cbc5ba;
+  border-radius: 13px;
+  font: inherit;
+  line-height: 1.6;
+  resize: vertical;
+}
+.field :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+.field input[aria-invalid="true"] {
+  border-color: #a32828;
+}
+.field input[type="file"] {
+  height: auto;
+  min-height: 52px;
+  padding: 10px;
+}
+input[type="file"]::file-selector-button {
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 10px;
+  margin-right: 10px;
+  color: var(--ink);
+  background: #ece5ff;
+  font: inherit;
+  cursor: pointer;
+}
+.check {
+  min-height: 32px;
+  line-height: 1.5;
+  align-items: flex-start;
+}
+.check input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0;
+  accent-color: var(--violet);
+}
+fieldset {
+  min-width: 0;
+}
+legend {
+  max-width: 100%;
+  line-height: 1.5;
+}
+:where(
+  .catalog-panel,
+  .purchase-panel,
+  .team-panel,
+  .reviewer-admin,
+  .data-panel,
+  .start-selling
+) {
+  background: var(--surface);
+  box-shadow: var(--shadow-surface);
+}
+:where(.catalog-card, .purchase-card, .data-stat, .metric) {
+  box-shadow: var(--shadow-surface);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+:where(.catalog-card, .purchase-card, .data-stat, .metric):hover {
+  border-color: rgba(109, 57, 255, 0.28);
+  box-shadow: var(--shadow-raised);
+}
+:where(
+  .catalog-card,
+  .purchase-card,
+  .data-panel,
+  .data-stat,
+  .team-member-row,
+  .notice
+) {
+  overflow-wrap: anywhere;
+}
+.catalog-card button {
+  margin: 0;
+}
+.catalog-card > .button {
+  margin: 4px 4px 4px 0;
+}
+.catalog-card :is(.catalog-filters, .listing-form, .checkout-form) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.catalog-card .purchase-actions {
+  padding: 16px;
+}
+.purchase-actions--compact h2 {
+  font-size: 1.2rem;
+}
+.purchase-form--inline .field {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.checkout-form {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+.checkout-form .button {
+  align-self: end;
+}
+.reviewer-invite-form {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+.team-member-identity {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.team-member-permissions {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  width: 100%;
+}
+.staff-permission-fieldset {
+  background: var(--cream);
+}
+.workspace-nav {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  height: 100dvh;
+  min-height: 0;
+}
+.workspace-nav > * {
+  flex-shrink: 0;
+}
+.workspace-kind > svg {
+  flex-shrink: 0;
+}
+.workspace-kind strong {
+  overflow-wrap: anywhere;
+}
+.workspace-kind select:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 4px;
+}
+.workspace-nav nav a {
+  min-height: 44px;
+  line-height: 1.5;
+}
+.workspace-nav nav a svg {
+  flex-shrink: 0;
+}
+.workspace-nav nav a:not(.active):hover,
+.logout:hover {
+  background: #292831;
+  color: white;
+}
+.logout {
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+.workspace-body {
+  width: 100%;
+  margin-inline: auto;
+}
+.workspace-main > header {
+  gap: 12px;
+  height: auto;
+  min-height: 94px;
+  padding-block: 14px;
+}
+.workspace-main > header > div:first-of-type {
+  min-width: 0;
+}
+.workspace-main header h1 {
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+.user-chip {
+  min-width: 0;
+  max-width: 42%;
+}
+.user-chip > span {
+  flex-shrink: 0;
+}
+.user-chip strong {
+  overflow-wrap: anywhere;
+}
+.workspace-menu,
+.menu-button,
+.workspace-brand button {
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.workspace-menu {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+.data-stat strong,
+.metric strong,
+.data-table,
+.listing-facts,
+.purchase-card {
+  font-variant-numeric: tabular-nums;
+}
+.data-table-wrap,
+.tier-table {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.data-table th,
+.tier-table th {
+  background: var(--paper);
+}
+.data-table tbody tr:hover {
+  background: rgba(109, 57, 255, 0.035);
+}
+.data-page .notice {
+  flex-wrap: wrap;
+}
+.collection-empty,
+.collection-status {
+  padding: 24px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: var(--cream);
+  color: var(--muted);
+  line-height: 1.6;
+}
+.collection-status::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--violet);
+}
+.notice {
+  overflow-wrap: anywhere;
+}
+.notice--warning {
+  background: #fff2ca;
+  color: #5c3c03;
+}
+.auth-aside {
+  justify-content: flex-end;
+}
+.auth-weave {
+  position: relative;
+  width: min(100%, 460px);
+  height: auto;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  left: auto;
+  top: auto;
+  transform: none;
+  margin: auto;
+}
+.auth-aside h2 {
+  font-size: clamp(3rem, 4.4vw, 5.3rem);
+  line-height: 1;
+}
+.auth-card {
+  padding-block: 48px;
+}
+.auth-links {
+  flex-wrap: wrap;
+  line-height: 1.5;
+}
+.payment-return-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow-raised);
+}
+.welcome {
+  isolation: isolate;
+}
+.welcome::after {
+  z-index: -1;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .workspace-body,
+  .payment-return-card {
+    animation: surface-enter 240ms ease-out both;
+  }
+  @keyframes surface-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+@media (max-width: 1023px) {
+  .workspace-main > header {
+    min-height: 78px;
+  }
+  .workspace-nav {
+    width: min(290px, calc(100vw - 32px));
+    left: -300px;
+  }
+}
+@media (max-width: 650px) {
+  .workspace-body {
+    padding: 16px;
+  }
+  .catalog-filters,
+  .listing-form,
+  .reviewer-invite-form,
+  .checkout-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .team-panel,
+  .reviewer-admin,
+  .purchase-panel,
+  .purchase-actions {
+    padding: 20px;
+  }
+  .data-page-heading,
+  .data-panel-heading,
+  .team-members-heading {
+    flex-wrap: wrap;
+  }
+  .seller-onboarding-header {
+    flex-wrap: wrap;
+  }
+  .tier-editor {
+    padding: 12px;
+  }
+  .tier-editor-row {
+    align-items: stretch;
+  }
+  .tier-editor-row .field {
+    flex-basis: 100%;
+  }
+  .settings-readonly {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .settings-readonly strong {
+    text-align: left;
+  }
+  .purchase-actions-row > .button,
+  .payment-return-actions > .button {
+    flex: 1 1 180px;
+  }
+}
+@media (max-width: 420px) {
+  .metric-grid,
+  .data-stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace-main > header {
+    padding-inline: 12px;
+    gap: 8px;
+  }
+  .workspace-main header h1 {
+    font-size: 1.15rem;
+  }
+  .user-chip {
+    max-width: 40px;
+  }
+  .catalog-panel,
+  .data-panel,
+  .purchase-panel,
+  .team-panel,
+  .reviewer-admin {
+    padding: 16px;
+  }
+  .catalog-filters .button,
+  .listing-form .button {
+    width: 100%;
   }
 }

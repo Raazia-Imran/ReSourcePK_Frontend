@@ -28,6 +28,7 @@ export function ListingImage({ image }) {
       <div className="notice" role="alert">
         <p>Image unavailable: {error}</p>
         <button
+          className="button button--quiet"
           type="button"
           onClick={() => {
             setUrl("");
@@ -116,6 +117,7 @@ export function TierEditor({ tiers, onChange }) {
             onChange={(e) => update(index, "pricePerUnit", e.target.value)}
           />
           <button
+            className="button button--quiet"
             type="button"
             onClick={() => onChange(tiers.filter((_, i) => i !== index))}
           >
@@ -124,6 +126,7 @@ export function TierEditor({ tiers, onChange }) {
         </div>
       ))}
       <button
+        className="button button--quiet"
         type="button"
         disabled={tiers.length >= 10}
         onClick={() =>
@@ -193,7 +196,12 @@ export function ListingImagesEditor({ listing, url, onSaved }) {
       {listing.images.map((image) => (
         <div key={image.id}>
           <ListingImage image={image} />
-          <button type="button" disabled={busy} onClick={() => remove(image)}>
+          <button
+            className="button button--quiet"
+            type="button"
+            disabled={busy}
+            onClick={() => remove(image)}
+          >
             Remove image: {image.altText}
           </button>
         </div>
@@ -215,7 +223,11 @@ export function ListingImagesEditor({ listing, url, onSaved }) {
           required
           maxLength="200"
         />
-        <button type="submit" disabled={busy || listing.images.length >= 8}>
+        <button
+          className="button button--quiet"
+          type="submit"
+          disabled={busy || listing.images.length >= 8}
+        >
           {busy ? "Uploading…" : "Upload image"}
         </button>
       </form>

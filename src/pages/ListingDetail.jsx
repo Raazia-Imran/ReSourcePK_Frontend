@@ -47,6 +47,7 @@ export default function ListingDetail() {
         </p>
         {error.status !== 404 && (
           <button
+            className="button button--quiet"
             type="button"
             onClick={() => {
               setFailure(null);

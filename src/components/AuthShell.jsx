@@ -22,7 +22,7 @@ export default function AuthShell({
         </Link>
       </section>
       <aside className="auth-aside">
-        <div className="auth-weave">
+        <div className="auth-weave" aria-hidden="true">
           <i />
           <i />
           <i />

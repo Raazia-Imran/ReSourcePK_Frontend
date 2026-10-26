@@ -129,6 +129,7 @@ export function Discovery() {
         <div role="alert" className="notice notice--error">
           <p>{error}</p>
           <button
+            className="button button--quiet"
             type="button"
             onClick={() => {
               setLoading(true);
@@ -198,6 +199,7 @@ export function Discovery() {
       {result.total > result.limit && (
         <div className="pagination">
           <button
+            className="button button--quiet"
             type="button"
             disabled={loading || search.page === 1}
             onClick={() => {
@@ -211,6 +213,7 @@ export function Discovery() {
             Page {search.page} of {Math.ceil(result.total / result.limit)}
           </span>
           <button
+            className="button button--quiet"
             type="button"
             disabled={loading || search.page * result.limit >= result.total}
             onClick={() => {
@@ -517,7 +520,7 @@ export function SellerListings({ membership }) {
             onClick={() =>
               downloadFile(
                 `${url}/import/template`,
-                "resourcepk-listings.csv",
+                "rethread-listings.csv",
               ).catch((err) => setError(err.message))
             }
           >
@@ -614,7 +617,11 @@ export function SellerListings({ membership }) {
                     url={url}
                     onSaved={load}
                   />
-                  <button type="button" onClick={() => edit(item)}>
+                  <button
+                    className="button button--quiet"
+                    type="button"
+                    onClick={() => edit(item)}
+                  >
                     Edit draft
                   </button>
                   <button
@@ -635,6 +642,7 @@ export function SellerListings({ membership }) {
                     Keep the record for audit; it cannot be republished.
                   </p>
                   <button
+                    className="button button--quiet"
                     type="button"
                     disabled={busy}
                     onClick={() => archive(item)}
@@ -786,6 +794,7 @@ export function Requirements() {
             {item.status !== "closed" && (
               <>
                 <button
+                  className="button button--quiet"
                   type="button"
                   disabled={busy}
                   onClick={() =>
@@ -801,6 +810,7 @@ export function Requirements() {
                   <summary>Close requirement</summary>
                   <p>Closing stops matching and cannot be undone.</p>
                   <button
+                    className="button button--quiet"
                     type="button"
                     disabled={busy}
                     onClick={() => changeStatus(item, "closed")}
@@ -811,6 +821,7 @@ export function Requirements() {
               </>
             )}
             <button
+              className="button button--quiet"
               type="button"
               disabled={busy || item.status !== "active"}
               onClick={() => match(item.id)}
@@ -930,6 +941,7 @@ export function ReviewQueue() {
                 Publish
               </button>
               <button
+                className="button button--quiet"
                 type="button"
                 onClick={() => review(item, "rejected")}
                 disabled={busy || (reasons[item.id] || "").trim().length < 3}
@@ -1072,6 +1084,7 @@ export function SellerRequestQueue() {
                 Approve and create organization
               </button>
               <button
+                className="button button--quiet"
                 type="button"
                 onClick={() => decide(item, "rejected")}
                 disabled={busy || (notes[item.id] || "").trim().length < 3}
