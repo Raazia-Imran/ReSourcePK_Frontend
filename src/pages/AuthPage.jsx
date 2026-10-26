@@ -95,7 +95,7 @@ function GoogleButton({ role, nonce, onCredential, busy, disabled }) {
     <div className="google-button">
       {!GOOGLE_CLIENT_ID ? (
         <p className="notice notice--error">
-          Google sign-in is not configured. Set VITE_GOOGLE_CLIENT_ID.
+          Google sign-in is temporarily unavailable. Please try again later.
         </p>
       ) : (
         <div ref={ref} aria-busy={busy || disabled} />

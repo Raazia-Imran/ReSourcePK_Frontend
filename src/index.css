@@ -2887,3 +2887,39 @@ legend {
     width: 100%;
   }
 }
+
+/* Bulk import is a distinct step, with the same field/action rhythm. */
+.import-panel {
+  margin-block: 28px;
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+}
+.import-panel h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.3rem;
+}
+.import-panel p {
+  line-height: 1.6;
+}
+.import-panel form {
+  display: grid;
+  gap: 16px;
+  margin-block: 12px;
+}
+.import-panel form > .button {
+  justify-self: start;
+}
+.import-review {
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.tier-table caption {
+  padding-inline: 12px;
+}
+.catalog-card details > .button {
+  margin-block: 8px;
+}
