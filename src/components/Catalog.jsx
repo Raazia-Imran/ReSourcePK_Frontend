@@ -164,7 +164,6 @@ export function Discovery() {
             <article className="catalog-card discovery-card" key={item.id}>
               {item.images?.[0] && <ListingImage image={item.images[0]} />}
               <div className="discovery-card__meta">
-                {item.is_demo && <span className="demo-badge">Demo stock</span>}
                 <span className="eyebrow">
                   {item.material} · {item.condition}
                 </span>
@@ -610,7 +609,7 @@ export function SellerListings({ membership }) {
           items.map((item) => (
             <article className="catalog-card" key={item.id}>
               <span className="eyebrow">{item.status.replace("_", " ")}</span>
-              {item.is_demo && <span className="demo-badge">Demo stock</span>}
+
               {item.images?.[0] && <ListingImage image={item.images[0]} />}
               <h3>{item.title}</h3>
               <PriceTiers tiers={item.price_tiers} unit={item.unit} />
@@ -920,7 +919,6 @@ export function ReviewQueue() {
           !collection.error &&
           items.map((item) => (
             <article className="catalog-card" key={item.id}>
-              {item.is_demo && <span className="demo-badge">Demo stock</span>}
               {item.images?.map((image) => (
                 <ListingImage image={image} key={image.id} />
               ))}

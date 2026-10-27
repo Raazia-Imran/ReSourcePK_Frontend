@@ -264,8 +264,8 @@ export function WorkspaceOverview({ kind, membership, context }) {
   const items = overviewMetrics(kind, remote.data);
   const description = {
     buyer: "Your order activity from live marketplace records.",
-    organization: "Your listing and order activity. Demo stock is excluded.",
-    platform: "Platform operations from live, non-demo marketplace data.",
+    organization: "Your listing and order activity. Sample stock is excluded.",
+    platform: "Platform operations from live, non-sample marketplace data.",
   }[kind];
   return (
     <section className="data-page overview-data">
@@ -311,7 +311,7 @@ export function SellerAnalytics({ membership }) {
       <PageHeading
         eyebrow="Organization reporting"
         title="Seller analytics"
-        description="Live listing and order activity for this organization. Demo listings are excluded from these figures."
+        description="Live listing and order activity for this organization. Sample listings are excluded from these figures."
         onRefresh={remote.reload}
         loading={remote.loading}
       />
@@ -540,7 +540,7 @@ export function PlatformOrganizations() {
     <DirectoryPage
       title="Organizations"
       eyebrow="Platform directory"
-      description="Seller workspaces and their current listing and membership counts. Demo fixtures are marked for clarity."
+      description="Seller workspaces and their current listing and membership counts. Sample records are marked for clarity."
       path="/platform/organizations"
       columns={[
         ["Organization", (row) => <strong>{row.name}</strong>],
@@ -553,7 +553,7 @@ export function PlatformOrganizations() {
           "Data",
           (row) =>
             row.is_demo ? (
-              <DataBadge tone="demo">Demo</DataBadge>
+              <DataBadge tone="demo">Sample</DataBadge>
             ) : (
               <DataBadge tone="live">Live</DataBadge>
             ),
@@ -568,7 +568,7 @@ export function PlatformUsers() {
     <DirectoryPage
       title="Users"
       eyebrow="Platform directory"
-      description="Account status, verification, and workspace roles. Demo accounts are explicitly labelled."
+      description="Account status, verification, and workspace roles. Sample accounts are explicitly labelled."
       path="/platform/users"
       columns={[
         ["User", (row) => <strong>{row.full_name}</strong>],
@@ -588,7 +588,7 @@ export function PlatformUsers() {
           "Account",
           (row) =>
             row.is_demo ? (
-              <DataBadge tone="demo">Demo</DataBadge>
+              <DataBadge tone="demo">Sample</DataBadge>
             ) : (
               <DataBadge tone="live">Live</DataBadge>
             ),
@@ -608,7 +608,7 @@ export function PlatformAnalytics() {
       <PageHeading
         eyebrow="Platform health"
         title="Platform analytics"
-        description="Operational counts from live accounts and non-demo marketplace activity. No synthetic seed activity is included in the totals."
+        description="Operational counts from live accounts and non-sample marketplace activity. No synthetic seed activity is included in the totals."
         onRefresh={remote.reload}
         loading={remote.loading}
       />

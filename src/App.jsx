@@ -13,9 +13,12 @@ import Marketplace from "./pages/Marketplace";
 import ListingDetail from "./pages/ListingDetail";
 import PaymentReturn from "./pages/PaymentReturn";
 
+import MotionEffects from "./components/MotionEffects";
+
 export default function App() {
   return (
     <BrowserRouter>
+      <MotionEffects />
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />

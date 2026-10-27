@@ -46,12 +46,15 @@ import {
   WorkspaceOverview,
 } from "../components/OperationalPages";
 
+import AccountProfile from "../components/AccountProfile";
+
 const roleConfig = {
   buyer: {
     label: "Buyer workspace",
     icon: ShoppingBag,
     nav: [
       [LayoutDashboard, "Overview"],
+      [UserCog, "Profile"],
       [Search, "Discover materials"],
       [ClipboardList, "Requirements"],
       [Boxes, "My purchases"],
@@ -64,6 +67,7 @@ const roleConfig = {
     icon: Building2,
     nav: [
       [LayoutDashboard, "Overview"],
+      [UserCog, "Profile"],
       [Boxes, "Listings"],
       [ShoppingBag, "Orders"],
       [Users, "Team & access"],
@@ -76,6 +80,7 @@ const roleConfig = {
     icon: ClipboardCheck,
     nav: [
       [LayoutDashboard, "Overview"],
+      [UserCog, "Profile"],
       [Building2, "Organizations"],
       [Users, "Users"],
       [ClipboardCheck, "Review queue"],
@@ -319,7 +324,11 @@ export default function Workspace({ kind }) {
             <p>{config.label}</p>
             <h1>{active}</h1>
           </div>
-          <div className="user-chip">
+          <Link
+            className="user-chip"
+            to={`${basePath}/profile`}
+            aria-label="Open your profile"
+          >
             <span>
               {context.user.full_name
                 .split(" ")
@@ -331,7 +340,7 @@ export default function Workspace({ kind }) {
               <strong>{context.user.full_name}</strong>
               <small>{role}</small>
             </div>
-          </div>
+          </Link>
         </header>
         <section className="workspace-body">
           {active === "Overview" && (
@@ -587,6 +596,7 @@ export function StartSelling({ context, refresh }) {
 }
 function WorkspaceContent({ active, kind, membership, context, refresh }) {
   if (active === "Overview") return null;
+  if (active === "Profile") return <AccountProfile />;
   const section = {
     "buyer:Impact": <BuyerImpact />,
     "buyer:Discover materials": <Discovery />,

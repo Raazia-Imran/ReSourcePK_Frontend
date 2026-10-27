@@ -1,4 +1,4 @@
-/* global process, console, document, innerWidth, URL */
+/* global process, console, document, innerWidth, URL, window */
 // Isolated presentation checks: every API response is synthetic, never a backend test.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
 const fs = require("node:fs");
@@ -268,6 +268,19 @@ const routes = {
     "/admin/seller-applications",
   ],
 };
+for (const role of [
+  "buyer",
+  "owner",
+  "manager",
+  "staff",
+  "admin",
+  "reviewer",
+]) {
+  let base = "/org/textiles";
+  if (role === "buyer") base = "/buyer";
+  if (["admin", "reviewer"].includes(role)) base = "/admin";
+  routes[role].push(base + "/profile");
+}
 let browser;
 // Sequential presentation matrix keeps screenshots and errors tied to their route.
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -286,7 +299,7 @@ let browser;
     let errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await setup(page, role);
-    for (const width of [360, 390, 768, 1024, 1280, 1440])
+    for (const width of [320, 360, 390, 768, 1024, 1280, 1440])
       for (const path of paths) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(base + path);
@@ -314,6 +327,8 @@ let browser;
         if (
           (width === 390 || width === 1440) &&
           [
+            "/",
+            "/buyer/profile",
             "/login",
             "/org/textiles/listings",
             "/buyer/my-purchases",
@@ -386,6 +401,47 @@ let browser;
     );
     await page.close();
   }
+  const discovery = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+  });
+  await setup(discovery, "buyer");
+  await discovery.goto(base + "/buyer/discover-materials");
+  await discovery.getByLabel("Search", { exact: true }).fill("denim");
+  await discovery.getByRole("button", { name: "Find materials" }).click();
+  await discovery.getByRole("button", { name: "Reset filters" }).click();
+  assert.equal(
+    await discovery.getByLabel("Search", { exact: true }).inputValue(),
+    "",
+  );
+  await discovery.getByRole("link", { name: "Open your profile" }).click();
+  await discovery.getByRole("heading", { name: "Personal details" }).waitFor();
+  assert.equal(
+    await discovery
+      .getByRole("link", { name: "Reset password" })
+      .getAttribute("href"),
+    "/forgot-password",
+  );
+  await discovery.close();
+  const landing = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+    reducedMotion: "reduce",
+  });
+  await setup(landing, "public");
+  await landing.goto(base);
+  await landing.evaluate(() => window.scrollTo(0, 1000));
+  assert(
+    await landing
+      .locator(".site-header")
+      .evaluate((e) => e.getBoundingClientRect().top >= 0),
+    "Public header stays visible while scrolling",
+  );
+  assert(
+    await landing
+      .getByRole("link", { name: "Start circulating" })
+      .evaluate((e) => e.getBoundingClientRect().height < 80),
+    "Mobile CTA stays compact",
+  );
+  await landing.close();
   const interactive = await browser.newPage({
     viewport: { width: 360, height: 800 },
     reducedMotion: "reduce",

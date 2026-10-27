@@ -62,7 +62,6 @@ export default function ListingDetail() {
   } else if (listing) {
     content = (
       <article className="listing-detail">
-        {listing.is_demo && <span className="demo-badge">Demo stock</span>}
         <p className="eyebrow">{listing.organization_name}</p>
         <h1>{listing.title}</h1>
         <div className="listing-detail-images">
