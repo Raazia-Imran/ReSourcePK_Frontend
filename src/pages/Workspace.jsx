@@ -46,6 +46,7 @@ import {
   WorkspaceOverview,
 } from "../components/OperationalPages";
 
+import useProfileAppearance from "../hooks/useProfileAppearance";
 import AccountProfile from "../components/AccountProfile";
 
 const roleConfig = {
@@ -265,6 +266,7 @@ export function WorkspaceEntry() {
 }
 export default function Workspace({ kind }) {
   const { context, logout, refresh } = useAuth();
+  const { appearance } = useProfileAppearance(context.user.id);
   const { orgSlug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -330,14 +332,18 @@ export default function Workspace({ kind }) {
             aria-label="Open your profile"
           >
             <span>
-              {context.user.full_name
-                .split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")}
+              {appearance.photo ? (
+                <img src={appearance.photo} alt="" />
+              ) : (
+                (appearance.name || context.user.full_name)
+                  .split(" ")
+                  .map((n) => n[0])
+                  .slice(0, 2)
+                  .join("")
+              )}
             </span>
             <div>
-              <strong>{context.user.full_name}</strong>
+              <strong>{appearance.name || context.user.full_name}</strong>
               <small>{role}</small>
             </div>
           </Link>
