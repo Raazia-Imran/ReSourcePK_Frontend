@@ -124,6 +124,17 @@ export function Discovery() {
         <button className="button" type="submit">
           Find materials
         </button>
+        <button
+          className="button button--quiet"
+          type="button"
+          onClick={() => {
+            const defaults = { q: "", material: "", unit: "", sort: "newest" };
+            setFilters(defaults);
+            setSearch({ ...defaults, page: 1 });
+          }}
+        >
+          Reset filters
+        </button>
       </form>
       {error && (
         <div role="alert" className="notice notice--error">

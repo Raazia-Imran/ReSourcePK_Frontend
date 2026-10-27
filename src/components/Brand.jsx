@@ -6,11 +6,7 @@ export default function Brand({ light = false }) {
       to="/"
       aria-label="ReThread home"
     >
-      <span className="brand__mark">
-        <i />
-        <i />
-        <i />
-      </span>
+      <img className="brand__logo" src="/rethread-logo.png" alt="" />
       <span>
         Re<em>Thread</em>
       </span>

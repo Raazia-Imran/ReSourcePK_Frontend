@@ -2,14 +2,14 @@
 @import "@fontsource-variable/bricolage-grotesque";
 :root {
   --catalog-border: rgba(23, 23, 32, 0.15);
-  --surface: #fffdf8;
+  --surface: #fffaff;
   --muted: #625d69;
   --shadow-surface: 0 8px 28px rgba(23, 23, 32, 0.045);
   --shadow-raised: 0 12px 32px rgba(23, 23, 32, 0.09);
   --ink: #171720;
-  --paper: #f3f0e8;
-  --cream: #fffaf0;
-  --acid: #d8ff45;
+  --paper: #f6f1ff;
+  --cream: #fff7f5;
+  --acid: #ffd1c8;
   --violet: #6d39ff;
   --coral: #ff725e;
   --blue: #28b8ff;
@@ -2922,4 +2922,131 @@ legend {
 }
 .catalog-card details > .button {
   margin-block: 8px;
+}
+
+/* ReThread shared visual language: violet, coral and floral surfaces. */
+.brand__logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.brand em {
+  margin-left: 0;
+  font-size: 1em;
+}
+.site-header {
+  position: sticky;
+  top: 10px;
+  margin: 10px auto;
+  width: calc(100% - 24px);
+  border-radius: 28px;
+  background: rgba(255, 250, 255, 0.94);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 8px 32px #6735b51a;
+  border: 1px solid #e8dcfa;
+}
+.button {
+  background: var(--violet);
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.button:hover:not(:disabled) {
+  background: #5124c8;
+  color: white;
+}
+.button:active:not(:disabled) {
+  background: #a93650;
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.button--quiet,
+.button--light {
+  background: #f1e8ff;
+  color: #5425bd;
+  border-color: #d9c5fa;
+}
+.button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #ad62ed;
+  outline-offset: 4px;
+}
+.workspace-nav {
+  background: linear-gradient(160deg, #48218b, #6a35b8 70%, #914c9d);
+}
+.workspace-nav nav a.active {
+  background: #ffd1c8;
+  color: #48218b;
+}
+.workspace-nav nav a:not(.active):hover,
+.logout:hover {
+  background: #ffffff24;
+}
+.workspace-main > header {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background: #fffaffed;
+  backdrop-filter: blur(18px);
+}
+.workspace-body {
+  background:
+    radial-gradient(ellipse at top right, #ffdedc80, transparent 55%),
+    radial-gradient(ellipse at left, #e9ddff, transparent 65%);
+}
+.data-stat,
+.metric,
+.data-panel,
+.catalog-card,
+.purchase-card {
+  background: linear-gradient(140deg, #fffaff, #f9f2ff);
+  border-color: #e3d5f4;
+  box-shadow:
+    0 4px 0 #e6d9f2,
+    0 16px 32px #5b2b9910;
+}
+.data-stat,
+.metric {
+  border-top: 3px solid var(--violet);
+}
+.data-stat:nth-child(even),
+.metric:nth-child(even) {
+  border-top-color: var(--coral);
+}
+.welcome {
+  background: linear-gradient(120deg, #ede0ff, #ffe2dc);
+}
+.hero__actions {
+  flex-wrap: wrap;
+}
+:where(.catalog-card, .data-stat, .metric) {
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :where(.catalog-card, .data-stat, .metric):hover {
+    transform: perspective(1000px) translateY(-5px) rotateX(1deg);
+    box-shadow:
+      0 8px 0 #e4d5f1,
+      0 24px 40px #6735b525;
+  }
+}
+@media (max-width: 650px) {
+  .site-header {
+    top: 6px;
+    padding-inline: 16px;
+    border-radius: 22px;
+  }
+  .hero__actions > * {
+    flex: 1 1 190px;
+    text-align: center;
+  }
+  .brand__logo {
+    width: 38px;
+    height: 38px;
+  }
 }
