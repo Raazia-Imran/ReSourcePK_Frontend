@@ -55,8 +55,8 @@ export default function OrderLifecycle({ order, organizationId, onChanged }) {
       setReason("");
       setNotice("Order updated.");
       await onChanged();
-    } catch (failure) {
-      setError(failure.message);
+    } catch (error_) {
+      setError(error_.message);
     } finally {
       setBusy(false);
     }
@@ -129,7 +129,7 @@ export default function OrderLifecycle({ order, organizationId, onChanged }) {
           </Link>
         )}
       </div>
-      {notice && <p role="status">{notice}</p>}
+      {notice && <output>{notice}</output>}
       {error && (
         <p className="notice notice--error" role="alert">
           {error}

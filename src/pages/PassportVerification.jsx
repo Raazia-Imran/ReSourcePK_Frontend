@@ -73,7 +73,11 @@ export default function PassportVerification() {
               placeholder="Paste the passport ID"
             />
           </label>
-          <button className="button" disabled={!validId(input.trim())}>
+          <button
+            type="submit"
+            className="button"
+            disabled={!validId(input.trim())}
+          >
             Check passport
           </button>
         </form>
@@ -83,7 +87,7 @@ export default function PassportVerification() {
           </p>
         )}
         {passportId && !invalid && !data && !error && (
-          <p role="status">Checking the passport…</p>
+          <output>Checking the passport…</output>
         )}
         {error && (
           <div className="notice notice--error" role="alert">
