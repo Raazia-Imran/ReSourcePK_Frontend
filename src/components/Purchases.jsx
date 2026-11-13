@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import OrderLifecycle from "./OrderLifecycle";
 import { api } from "../services/api";
 import { formatCurrency } from "../utils/formatters";
 
@@ -302,6 +303,7 @@ export function BuyerPurchases() {
             <p>
               {order.quantity} {order.unit} · {cash(order.total_minor)}
             </p>
+            <OrderLifecycle order={order} onChanged={orders.reload} />
             {order.group_id && <p>Group status: {label(order.group_status)}</p>}
             {order.status === "pending_seller_confirmation" && (
               <p>Seller response due {when(order.seller_response_due_at)}.</p>
@@ -457,9 +459,7 @@ export function SellerOrders({ membership }) {
       setBusy("");
     }
   }
-  const directOrders = (orders.data?.items || []).filter(
-    (order) => !order.group_id,
-  );
+  const directOrders = orders.data?.items || [];
   const groupItems = groups.data?.items || [];
   const groupListings = (listings.data?.items || []).filter(
     (item) =>
@@ -493,7 +493,7 @@ export function SellerOrders({ membership }) {
         onCreated={groups.reload}
       />
       <div className="purchase-section">
-        <h3>Direct orders</h3>
+        <h3>Individual orders and group contributions</h3>
         {orders.loading && <p>Loading orders…</p>}
         {orders.error && (
           <div className="notice notice--error">{orders.error}</div>
@@ -513,6 +513,13 @@ export function SellerOrders({ membership }) {
             <p>
               {order.quantity} {order.unit} · {cash(order.total_minor)}
             </p>
+            {mayDecide && (
+              <OrderLifecycle
+                order={order}
+                organizationId={orgId}
+                onChanged={orders.reload}
+              />
+            )}
             {order.status === "pending_seller_confirmation" && (
               <p>Respond by {when(order.seller_response_due_at)}.</p>
             )}

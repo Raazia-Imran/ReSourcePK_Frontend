@@ -11,6 +11,7 @@ import SellerApplicationPage from "./pages/SellerApplicationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Marketplace from "./pages/Marketplace";
 import ListingDetail from "./pages/ListingDetail";
+import PassportVerification from "./pages/PassportVerification";
 import PaymentReturn from "./pages/PaymentReturn";
 
 import MotionEffects from "./components/MotionEffects";
@@ -22,6 +23,11 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/verify" element={<PassportVerification />} />
+          <Route
+            path="/verify/:passportId"
+            element={<PassportVerification />}
+          />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route
             path="/marketplace/listings/:listingId"
