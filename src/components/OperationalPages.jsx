@@ -195,6 +195,105 @@ export function BuyerImpact() {
   );
 }
 
+function CommerceMetrics({ organizationId }) {
+  const remote = useRemoteData(
+    organizationId
+      ? `/organizations/${organizationId}/commerce-metrics`
+      : "/platform/commerce-metrics",
+  );
+  const d = remote.data;
+  const rate = (numerator, denominator) =>
+    Number(denominator)
+      ? `${((Number(numerator) / Number(denominator)) * 100).toFixed(1)}%`
+      : "—";
+  return (
+    <div className="data-panel">
+      <PageHeading
+        eyebrow="Last 30 days · UTC order cohort"
+        title="Business performance"
+        description="Sample listings and buyers are excluded. Recorded payments may include sandbox activity."
+        onRefresh={remote.reload}
+        loading={remote.loading}
+      />
+      <StateMessage
+        loading={remote.loading}
+        error={remote.error}
+        onRetry={remote.reload}
+      />
+      {d && (
+        <>
+          <StatGrid
+            items={[
+              [
+                "Paid GMV",
+                cash(d.paid_gmv_minor),
+                "Gross order value with a successful payment record, including later refunds",
+              ],
+              [
+                "Average order value",
+                Number(d.paid_orders)
+                  ? cash(Number(d.paid_gmv_minor) / Number(d.paid_orders))
+                  : "—",
+                "Paid GMV ÷ paid orders",
+              ],
+              [
+                "Order payment rate",
+                rate(d.paid_orders, d.placed_orders),
+                "Paid orders ÷ placed orders",
+              ],
+              [
+                "Payment attempt success",
+                rate(d.successful_attempts, d.payment_attempts),
+                "Successful or later refunded attempts ÷ all attempts",
+              ],
+              [
+                "Repeat purchaser rate",
+                rate(d.repeat_customers, d.purchasing_customers),
+                "Buyers with two or more paid orders ÷ paying buyers in this period",
+              ],
+              ["Completed orders", d.completed_orders],
+              [
+                "Group funding rate",
+                rate(d.confirmed_groups, d.closed_groups),
+                "Paid groups ÷ groups that ended paid or expired",
+              ],
+              [
+                "Cancellation rate",
+                rate(d.cancelled_orders, d.placed_orders),
+                "Cancelled, rejected or expired orders ÷ placed orders",
+              ],
+              [
+                "Recorded refund rate",
+                rate(d.refunded_orders, d.paid_orders),
+                "Recorded refunded orders ÷ paid orders; includes simulations",
+              ],
+              [
+                "Recorded refunds",
+                cash(d.recorded_refund_minor),
+                "Recorded full order refund value; not proof of bank settlement",
+              ],
+            ]}
+          />
+          <p className="form-hint">
+            {d.financialBasis}. Period: {date(d.period.from)} to{" "}
+            {date(d.period.to)} (end exclusive). No denominator means —.
+          </p>
+          <details>
+            <summary>Metrics that need more data</summary>
+            <ul>
+              {d.unavailable.map((item) => (
+                <li key={item.name}>
+                  <strong>{item.name}:</strong> {item.reason}
+                </li>
+              ))}
+            </ul>
+          </details>
+        </>
+      )}
+    </div>
+  );
+}
+
 function overviewPath(kind, membership, context) {
   if (kind === "buyer") return "/analytics/buyer-impact";
   if (kind === "organization") {
@@ -290,6 +389,7 @@ export function WorkspaceOverview({ kind, membership, context }) {
         onRetry={remote.reload}
       />
       {remote.data && <StatGrid items={items} />}
+      {kind === "platform" && <CommerceMetrics />}
       <p className="form-hint">
         {kind === "platform"
           ? "Recorded payment states are operational counts, not settlement or revenue reporting."
@@ -320,6 +420,7 @@ export function SellerAnalytics({ membership }) {
         error={remote.error}
         onRetry={remote.reload}
       />
+      <CommerceMetrics organizationId={membership.organization_id} />
       {data && (
         <>
           <StatGrid
@@ -338,6 +439,10 @@ export function SellerAnalytics({ membership }) {
                 quantityByUnit(data.orders.requested_quantity_by_unit),
               ],
               ["Recorded paid value", cash(data.orders.paid_total_minor)],
+              [
+                "Net completed material",
+                quantityByUnit(data.impact?.quantity_by_unit),
+              ],
             ]}
           />
           <div className="data-panel">
@@ -619,6 +724,11 @@ export function PlatformAnalytics() {
       />
       {data && (
         <>
+          <CommerceMetrics />
+          <p>
+            Net completed material, after recorded reversals:{" "}
+            {quantityByUnit(data.impact?.quantity_by_unit)}
+          </p>
           <h3 className="data-section-title">Accounts and moderation</h3>
           <StatGrid
             items={[

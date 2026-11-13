@@ -3363,3 +3363,58 @@ footer,
   border-radius: 20px;
   object-fit: cover;
 }
+
+.passport-page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 72px 24px;
+}
+.passport-page > h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+.passport-page > p {
+  max-width: 66ch;
+}
+.passport-page > .notice,
+.passport-result {
+  margin: 24px 0;
+}
+.passport-result dl {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px 18px;
+}
+.passport-result dt {
+  font-weight: 700;
+}
+.passport-result dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.order-lifecycle {
+  border-top: 1px solid var(--line, #dedbe7);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+.order-lifecycle textarea {
+  width: 100%;
+  font: inherit;
+  padding: 10px;
+  border: 1px solid #d7d1e7;
+  border-radius: 10px;
+  resize: vertical;
+}
+@media (max-width: 540px) {
+  .passport-page {
+    padding: 40px 18px;
+  }
+  .passport-result dl {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .passport-result dd {
+    margin-bottom: 14px;
+  }
+}

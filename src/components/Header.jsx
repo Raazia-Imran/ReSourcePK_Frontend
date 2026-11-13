@@ -29,7 +29,9 @@ export default function Header() {
         </NavLink>
         <a href="/#how">How it works</a>
         <a href="/#model">Purchase models</a>
-        <a href="/#trust">Trust</a>
+        <NavLink to="/verify" onClick={closeNavigation}>
+          Verify passport
+        </NavLink>
         <div className="nav-signin">
           <button
             type="button"
