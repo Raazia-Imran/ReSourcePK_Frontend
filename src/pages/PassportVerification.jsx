@@ -37,11 +37,11 @@ export default function PassportVerification() {
     };
   }, [passportId, revision]);
   const data =
-    record?.id === passportId && record.revision === revision
+    record?.id === passportId && record?.revision === revision
       ? record.data
       : null;
   const error =
-    failure?.id === passportId && failure.revision === revision
+    failure?.id === passportId && failure?.revision === revision
       ? failure.message
       : "";
   const invalid = passportId && !validId(passportId);

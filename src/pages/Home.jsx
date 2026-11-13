@@ -56,9 +56,9 @@ export default function Home() {
         </section>
         <section className="ticker" aria-label="Platform capabilities">
           <div>
-            SELLER CONTROL <i /> POOLED DEMAND COMING SOON <i /> DIRECT PURCHASE
-            COMING SOON <i /> MATERIAL PASSPORT PLANNED <i /> ROLE-BASED
-            OPERATIONS <i /> SELLER CONTROL <i /> POOLED DEMAND
+            SELLER CONTROL <i /> POOLED DEMAND <i /> DIRECT PURCHASE <i />{" "}
+            MATERIAL PASSPORT <i /> ROLE-BASED OPERATIONS <i /> SELLER CONTROL{" "}
+            <i /> POOLED DEMAND
           </div>
         </section>
         <section className="section intro" id="how">
