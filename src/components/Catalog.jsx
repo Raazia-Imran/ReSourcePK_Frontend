@@ -29,6 +29,7 @@ const emptyListing = {
   priceTiers: [],
   expeditedPricePerUnit: "",
   expeditedLeadTimeDays: "",
+  expeditedMinOrderQuantity: "",
 };
 const units = ["kg", "meter", "roll", "piece"];
 
@@ -198,8 +199,8 @@ export function Discovery() {
                 <PriceTiers tiers={item.price_tiers} unit={item.unit} />
                 <p>
                   {item.purchase_mode === "group"
-                    ? "Join a Seller-created group order to pool your share with other Buyers."
-                    : "Buy directly or join a Seller-created group order when one is available."}
+                    ? "Start or join a Buyer-created group order and select one of its share sizes."
+                    : "Buy directly, start or join a group, or choose urgent delivery when offered."}
                 </p>
               </details>
               {["group", "both"].includes(item.purchase_mode) && (
@@ -248,7 +249,7 @@ function GroupOrdersDisclosure({ listing, context }) {
       className="discovery-groups"
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
-      <summary>View or join Seller group orders</summary>
+      <summary>View or join Buyer-created groups</summary>
       {open && (
         <ListingPurchaseActions listing={listing} context={context} groupOnly />
       )}
@@ -292,6 +293,7 @@ export function SellerListings({ membership }) {
           expeditedLeadTimeDays: input.expeditedLeadTimeDays
             ? Number(input.expeditedLeadTimeDays)
             : null,
+          expeditedMinOrderQuantity: input.expeditedMinOrderQuantity || null,
           ...(editingId ? { version: editingVersion } : {}),
         }),
       });
@@ -358,6 +360,7 @@ export function SellerListings({ membership }) {
       location: item.location,
       expeditedPricePerUnit: item.expedited_price_per_unit || "",
       expeditedLeadTimeDays: item.expedited_lead_time_days || "",
+      expeditedMinOrderQuantity: item.expedited_min_order_quantity || "",
       priceTiers: (item.price_tiers || []).map((tier) => ({
         rowId: crypto.randomUUID(),
         minQuantity: tier.minQuantity,
@@ -523,6 +526,24 @@ export function SellerListings({ membership }) {
                 setInput({ ...input, expeditedLeadTimeDays: e.target.value })
               }
             />
+            <FormField
+              label={`Urgent minimum quantity (${input.unit})`}
+              type="number"
+              step="0.001"
+              min="0.001"
+              max={input.quantity || undefined}
+              value={input.expeditedMinOrderQuantity}
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  expeditedMinOrderQuantity: e.target.value,
+                })
+              }
+            />
+            <small>
+              Leave blank to use the listing MOQ. A lower urgent minimum lets
+              Buyers switch a smaller group share to a separate urgent order.
+            </small>
           </fieldset>
           <label className="field listing-description">
             <span>Description (at least 20 characters)</span>

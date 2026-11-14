@@ -42,6 +42,9 @@ export function ListingPurchaseActions({
   groupOnly = false,
 }) {
   const [quantity, setQuantity] = useState("");
+  const [groupTarget, setGroupTarget] = useState("");
+  const [shareSizes, setShareSizes] = useState(["", "", ""]);
+  const [groupDeadline, setGroupDeadline] = useState(closeDefault);
   const [fulfilmentPriority, setFulfilmentPriority] = useState("standard");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -54,6 +57,8 @@ export function ListingPurchaseActions({
   );
   async function direct(event) {
     event.preventDefault();
+    const priority =
+      !directEnabled && urgentEnabled ? "expedited" : fulfilmentPriority;
     setBusy(true);
     setError("");
     setNotice("");
@@ -64,8 +69,7 @@ export function ListingPurchaseActions({
           listingId: listing.id,
           quantity,
           requestKey: key(),
-          fulfilmentPriority:
-            !directEnabled && urgentEnabled ? "expedited" : fulfilmentPriority,
+          fulfilmentPriority: priority,
         }),
       });
       setNotice(
@@ -99,6 +103,33 @@ export function ListingPurchaseActions({
           cash(order.total_minor) +
           ". Seller confirmation comes before payment.",
       );
+      await groups.reload();
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function createGroup(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await api("/listings/" + listing.id + "/purchase-groups", {
+        method: "POST",
+        body: JSON.stringify({
+          targetQuantity: groupTarget,
+          shareOptions: shareSizes.filter(Boolean),
+          closesAt: new Date(groupDeadline).toISOString(),
+          requestKey: key(),
+        }),
+      });
+      setNotice(
+        "Your group is open. Buyers can join using one of your share sizes.",
+      );
+      setGroupTarget("");
+      setShareSizes(["", "", ""]);
       await groups.reload();
     } catch (failure) {
       setError(failure.message);
@@ -148,7 +179,14 @@ export function ListingPurchaseActions({
             </p>
           )}
           <label className="field">
-            <span>Quantity ({listing.unit})</span>
+            <span>
+              Quantity ({listing.unit}) · minimum{" "}
+              {(!directEnabled && urgentEnabled) ||
+              fulfilmentPriority === "expedited"
+                ? listing.expedited_min_order_quantity ||
+                  listing.min_order_quantity
+                : listing.min_order_quantity}
+            </span>
             <input
               type="number"
               min="0.001"
@@ -170,6 +208,81 @@ export function ListingPurchaseActions({
       {groupEnabled && (
         <div className="purchase-list">
           {!groupOnly && <h3>Open group orders</h3>}
+          {context && !groupOnly && (
+            <form
+              className="purchase-form purchase-create-group-form"
+              onSubmit={createGroup}
+            >
+              <h3>Start a group order</h3>
+              <p>
+                Set the total target (at least the listing MOQ) and three or
+                four share sizes. Individual shares may be smaller than the
+                listing MOQ; the total group quantity must meet it.
+              </p>
+              <label className="field">
+                <span>
+                  Total group target ({listing.unit}) · listing MOQ{" "}
+                  {listing.min_order_quantity}
+                </span>
+                <input
+                  type="number"
+                  min={listing.min_order_quantity}
+                  max={listing.quantity}
+                  step="0.001"
+                  value={groupTarget}
+                  onChange={(event) => setGroupTarget(event.target.value)}
+                  required
+                />
+              </label>
+              {shareSizes.map((size, index) => (
+                <label className="field" key={index}>
+                  <span>
+                    Share option {index + 1} ({listing.unit})
+                  </span>
+                  <input
+                    type="number"
+                    min="0.001"
+                    max={groupTarget || listing.quantity}
+                    step="0.001"
+                    value={size}
+                    onChange={(event) =>
+                      setShareSizes((current) =>
+                        current.map((value, i) =>
+                          i === index ? event.target.value : value,
+                        ),
+                      )
+                    }
+                    required
+                  />
+                </label>
+              ))}
+              {shareSizes.length < 4 && (
+                <button
+                  className="button button--quiet"
+                  type="button"
+                  onClick={() => setShareSizes((current) => [...current, ""])}
+                >
+                  Add another share size
+                </button>
+              )}
+              <label className="field">
+                <span>Join period ends</span>
+                <input
+                  type="datetime-local"
+                  min={closeDefault()}
+                  value={groupDeadline}
+                  onChange={(event) => setGroupDeadline(event.target.value)}
+                  required
+                />
+              </label>
+              <small>
+                A share equal to the exact remaining quantity is also accepted.
+              </small>
+              <button className="button" disabled={busy}>
+                {busy ? "Starting group…" : "Start group"}
+              </button>
+            </form>
+          )}
           {groups.error && (
             <div className="notice notice--error" role="alert">
               {groups.error}
@@ -180,8 +293,8 @@ export function ListingPurchaseActions({
             <p className="group-empty-state">
               <strong>No group orders are open right now.</strong>
               <span>
-                The Seller has not started a group for this material yet. Check
-                back later to join when one opens.
+                No Buyer has started a group for this material yet. You can
+                start one above.
               </span>
             </p>
           )}
@@ -219,6 +332,12 @@ function BuyerGroup({ group, signedIn, busy, onJoin }) {
   const [share, setShare] = useState("");
   const joined = Number(group.joined_quantity || 0);
   const remaining = Math.max(0, Number(group.target_quantity) - joined);
+  const options = (group.share_options || [])
+    .map(Number)
+    .filter((value) => value > 0 && value <= remaining);
+  if (remaining > 0 && !options.some((value) => value === remaining))
+    options.push(remaining);
+  const canJoin = group.status === "open";
   return (
     <article className="purchase-card">
       <div className="purchase-card-heading">
@@ -237,40 +356,47 @@ function BuyerGroup({ group, signedIn, busy, onJoin }) {
         value={Math.min(joined, Number(group.target_quantity))}
         aria-label="Group progress"
       />
-      {signedIn &&
-        remaining > 0 &&
-        ["open", "ready_for_confirmation", "reconfirmation_required"].includes(
-          group.status,
-        ) && (
-          <form
-            className="purchase-form purchase-form--inline"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onJoin(group.id, share);
-              setShare("");
-            }}
-          >
-            <label className="field">
-              <span>Your share ({group.unit})</span>
-              <input
-                type="number"
-                min="0.001"
-                step="0.001"
-                max={remaining}
-                value={share}
-                onChange={(event) => setShare(event.target.value)}
-                required
-              />
-            </label>
-            <button className="button" disabled={busy}>
-              Join group
-            </button>
-          </form>
-        )}
+      {signedIn && remaining > 0 && canJoin && (
+        <form
+          className="purchase-form purchase-form--inline"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onJoin(group.id, share);
+            setShare("");
+          }}
+        >
+          <label className="field">
+            <span>Your share ({group.unit})</span>
+            <select
+              value={share}
+              onChange={(event) => setShare(event.target.value)}
+              required
+            >
+              <option value="">Choose a share</option>
+              {options.map((value) => (
+                <option key={value} value={value}>
+                  {value} {group.unit}
+                  {value === remaining ? " · exact remainder" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="button" disabled={busy}>
+            Join group
+          </button>
+        </form>
+      )}
       {!signedIn && (
         <Link className="text-action" to="/login">
           Sign in to join
         </Link>
+      )}
+      {group.status === "deadline_choices" && (
+        <p>
+          Group target was not reached. Current participants can extend once,
+          switch an eligible share to urgent direct purchase, or leave from My
+          purchases.
+        </p>
       )}
     </article>
   );
@@ -297,6 +423,44 @@ export function BuyerPurchases() {
         { method: "POST", body: JSON.stringify({}) },
       );
       setNotice("You left the group and your reserved share was released.");
+      await orders.reload();
+    } catch (failure) {
+      orders.setError(failure.message);
+    } finally {
+      setBusy("");
+    }
+  }
+  async function groupAction(order, action) {
+    if (action === "direct") {
+      const total =
+        Number(order.quantity) * Number(order.expedited_price_per_unit_minor);
+      const accepted = window.confirm(
+        `Switch ${order.quantity} ${order.unit} to a separate urgent order?\n\nUrgent price: ${cash(order.expedited_price_per_unit_minor)} per ${order.unit}\nTotal: ${cash(total)} PKR\nSeller turnaround: ${order.expedited_lead_time_days} days\nSeller confirmation: within 48 hours`,
+      );
+      if (!accepted) return;
+    }
+    setBusy(order.id);
+    orders.setError("");
+    setNotice("");
+    try {
+      if (action === "extend") {
+        await api(`/purchase-groups/${order.group_id}/extend`, {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        setNotice("The group was extended once for 48 hours.");
+      } else {
+        const direct = await api(
+          `/purchase-groups/${order.group_id}/contributions/${order.id}/switch-to-direct`,
+          {
+            method: "POST",
+            body: JSON.stringify({ requestKey: key() }),
+          },
+        );
+        setNotice(
+          `Your share became a separate urgent order at ${cash(direct.unit_price_minor)} per ${direct.unit}. The Seller must confirm it within 48 hours.`,
+        );
+      }
       await orders.reload();
     } catch (failure) {
       orders.setError(failure.message);
@@ -366,6 +530,23 @@ export function BuyerPurchases() {
                   Your share price is locked. Payment starts after Seller
                   confirmation.
                 </p>
+                {order.group_status === "open" && (
+                  <p>Group join deadline: {when(order.group_closes_at)}.</p>
+                )}
+                {order.group_status === "deadline_choices" && (
+                  <p>
+                    Group target was missed. Choose an option by{" "}
+                    {when(order.group_choice_deadline_at)}.
+                  </p>
+                )}
+                {order.group_status === "open" &&
+                  Number(order.group_extension_count) === 1 && (
+                    <p>
+                      The group is in its final 48-hour extension, until{" "}
+                      {when(order.group_closes_at)}. You may stay, leave, or
+                      choose an eligible urgent order.
+                    </p>
+                  )}
                 <button
                   className="button button--quiet"
                   type="button"
@@ -374,6 +555,38 @@ export function BuyerPurchases() {
                 >
                   {busy === order.id ? "Leaving…" : "Leave group"}
                 </button>
+                {order.group_status === "deadline_choices" &&
+                  Number(order.group_extension_count) === 0 && (
+                    <button
+                      className="button button--quiet"
+                      type="button"
+                      disabled={busy === order.id}
+                      onClick={() => groupAction(order, "extend")}
+                    >
+                      Extend group once by 48 hours
+                    </button>
+                  )}
+                {(order.group_status === "deadline_choices" ||
+                  (order.group_status === "open" &&
+                    Number(order.group_extension_count) === 1 &&
+                    new Date(order.group_closes_at) > new Date())) &&
+                  order.expedited_price_per_unit_minor &&
+                  Number(order.quantity) >=
+                    Number(
+                      order.expedited_min_order_quantity ||
+                        order.min_order_quantity ||
+                        0,
+                    ) && (
+                    <button
+                      className="button"
+                      type="button"
+                      disabled={busy === order.id}
+                      onClick={() => groupAction(order, "direct")}
+                    >
+                      Switch to urgent direct ·{" "}
+                      {cash(order.expedited_price_per_unit_minor)}/{order.unit}
+                    </button>
+                  )}
               </>
             )}
           </article>
@@ -475,12 +688,6 @@ export function SellerOrders({ membership }) {
       [orgId],
     ),
   );
-  const listings = useData(
-    useCallback(
-      () => api("/organizations/" + orgId + "/listings?limit=50"),
-      [orgId],
-    ),
-  );
   const [busy, setBusy] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -504,11 +711,6 @@ export function SellerOrders({ membership }) {
   }
   const directOrders = orders.data?.items || [];
   const groupItems = groups.data?.items || [];
-  const groupListings = (listings.data?.items || []).filter(
-    (item) =>
-      item.status === "published" &&
-      ["group", "both"].includes(item.purchase_mode),
-  );
   return (
     <section className="purchase-panel">
       <p className="eyebrow">Seller workspace</p>
@@ -530,11 +732,6 @@ export function SellerOrders({ membership }) {
           confirmation access can decide them.
         </div>
       )}
-      <SellerGroupCreator
-        organizationId={orgId}
-        listings={groupListings}
-        onCreated={groups.reload}
-      />
       <div className="purchase-section">
         <h3>Individual orders and group contributions</h3>
         {orders.loading && <p>Loading orders…</p>}
@@ -629,9 +826,7 @@ export function SellerOrders({ membership }) {
           const joined = Number(group.joined_quantity || 0);
           const target = Number(group.target_quantity || 0);
           const reached = joined >= target;
-          const passed = new Date(group.closes_at) <= new Date();
-          const open = [
-            "open",
+          const canDecide = [
             "ready_for_confirmation",
             "reconfirmation_required",
           ].includes(group.status);
@@ -648,12 +843,34 @@ export function SellerOrders({ membership }) {
                 {joined} / {target} {group.unit} joined
               </p>
               <progress max={target || 1} value={Math.min(joined, target)} />
-              {open && <p>{groupGuidance(reached, passed)}</p>}
-              {mayDecide && open && (
+              {group.status === "ready_for_confirmation" && (
+                <p>
+                  Target met. Review and confirm or reject by{" "}
+                  {when(group.seller_response_due_at)}.
+                </p>
+              )}
+              {group.status === "reconfirmation_required" && (
+                <p>
+                  Respond by {when(group.seller_response_due_at)}. A participant
+                  missed payment. Review the remaining shares; already-paid
+                  shares remain paid.
+                </p>
+              )}
+              {group.status === "deadline_choices" && (
+                <p>
+                  Waiting for participants to extend, switch eligible shares to
+                  urgent direct orders, or leave. Seller confirmation is not
+                  available yet.
+                </p>
+              )}
+              {mayDecide && canDecide && (
                 <div className="purchase-actions-row">
                   <button
                     className="button"
-                    disabled={busy.endsWith(group.id) || (!reached && !passed)}
+                    disabled={
+                      busy.endsWith(group.id) ||
+                      (!reached && group.status !== "reconfirmation_required")
+                    }
                     onClick={() =>
                       act(
                         "/organizations/" +
@@ -662,31 +879,29 @@ export function SellerOrders({ membership }) {
                           group.id +
                           "/decision",
                         { decision: "confirm" },
-                        "Group confirmed. Buyers have 48 hours to pay.",
+                        "Group revision confirmed. Remaining unpaid Buyers have 48 hours to pay.",
                       )
                     }
                   >
-                    {reached ? "Confirm group" : "Confirm smaller group"}
+                    {reached ? "Confirm group" : "Confirm revised group"}
                   </button>
-                  {passed && !reached && (
-                    <button
-                      className="button button--quiet"
-                      disabled={busy.endsWith(group.id)}
-                      onClick={() =>
-                        act(
-                          "/organizations/" +
-                            orgId +
-                            "/purchase-groups/" +
-                            group.id +
-                            "/decision",
-                          { decision: "expire" },
-                          "Group expired and reservations released.",
-                        )
-                      }
-                    >
-                      Expire group
-                    </button>
-                  )}
+                  <button
+                    className="button button--quiet"
+                    disabled={busy.endsWith(group.id)}
+                    onClick={() =>
+                      act(
+                        "/organizations/" +
+                          orgId +
+                          "/purchase-groups/" +
+                          group.id +
+                          "/decision",
+                        { decision: "reject" },
+                        "Group rejected. Unpaid reservations were released; paid shares remain unchanged.",
+                      )
+                    }
+                  >
+                    Reject group
+                  </button>
                 </div>
               )}
               {group.status === "payment_open" && (
@@ -697,102 +912,5 @@ export function SellerOrders({ membership }) {
         })}
       </div>
     </section>
-  );
-}
-
-function groupGuidance(reached, deadlinePassed) {
-  if (reached) return "Target reached. Ready for Seller confirmation.";
-  if (deadlinePassed)
-    return "Deadline passed. Confirm the smaller group or expire it.";
-  return "Waiting for target quantity or deadline.";
-}
-
-function SellerGroupCreator({ organizationId, listings, onCreated }) {
-  const [listingId, setListingId] = useState("");
-  const [target, setTarget] = useState("");
-  const [deadline, setDeadline] = useState(closeDefault);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-  async function create(event) {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
-    setNotice("");
-    try {
-      await api("/organizations/" + organizationId + "/purchase-groups", {
-        method: "POST",
-        body: JSON.stringify({
-          listingId,
-          targetQuantity: target,
-          closesAt: new Date(deadline).toISOString(),
-          requestKey: key(),
-        }),
-      });
-      setNotice("Group created and open for Buyer contributions.");
-      setListingId("");
-      setTarget("");
-      setDeadline(closeDefault());
-      await onCreated();
-    } catch (failure) {
-      setError(failure.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <details className="purchase-create-group">
-      <summary>Create a group order</summary>
-      {!listings.length ? (
-        <p>Publish a listing with Group or Both purchase mode first.</p>
-      ) : (
-        <form
-          className="purchase-form purchase-create-group-form"
-          onSubmit={create}
-        >
-          <label className="field">
-            <span>Published listing</span>
-            <select
-              value={listingId}
-              onChange={(event) => setListingId(event.target.value)}
-              required
-            >
-              <option value="">Choose listing</option>
-              {listings.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.title} · {item.quantity} {item.unit}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Target quantity</span>
-            <input
-              type="number"
-              min="0.001"
-              step="0.001"
-              value={target}
-              onChange={(event) => setTarget(event.target.value)}
-              required
-            />
-          </label>
-          <label className="field">
-            <span>Group deadline</span>
-            <input
-              type="datetime-local"
-              min={closeDefault()}
-              value={deadline}
-              onChange={(event) => setDeadline(event.target.value)}
-              required
-            />
-          </label>
-          {error && <div className="notice notice--error">{error}</div>}
-          {notice && <div className="notice notice--success">{notice}</div>}
-          <button className="button" disabled={busy}>
-            {busy ? "Creating…" : "Create group"}
-          </button>
-        </form>
-      )}
-    </details>
   );
 }
