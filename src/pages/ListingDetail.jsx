@@ -95,6 +95,18 @@ export default function ListingDetail() {
             <dt>Base price per {listing.unit}</dt>
             <dd>{formatCurrency(listing.price_per_unit)}</dd>
           </div>
+          {listing.expedited_price_per_unit && (
+            <div>
+              <dt>Urgent order</dt>
+              <dd>
+                {formatCurrency(listing.expedited_price_per_unit)} per{" "}
+                {listing.unit}
+                {" · "}
+                {listing.expedited_lead_time_days}-day turnaround after verified
+                payment
+              </dd>
+            </div>
+          )}
           {listing.color && (
             <div>
               <dt>Color</dt>

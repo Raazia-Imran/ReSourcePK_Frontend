@@ -27,6 +27,8 @@ const emptyListing = {
   composition: "",
   location: "",
   priceTiers: [],
+  expeditedPricePerUnit: "",
+  expeditedLeadTimeDays: "",
 };
 const units = ["kg", "meter", "roll", "piece"];
 
@@ -286,6 +288,10 @@ export function SellerListings({ membership }) {
             minQuantity,
             pricePerUnit,
           })),
+          expeditedPricePerUnit: input.expeditedPricePerUnit || null,
+          expeditedLeadTimeDays: input.expeditedLeadTimeDays
+            ? Number(input.expeditedLeadTimeDays)
+            : null,
           ...(editingId ? { version: editingVersion } : {}),
         }),
       });
@@ -350,6 +356,8 @@ export function SellerListings({ membership }) {
       color: item.color,
       composition: item.composition,
       location: item.location,
+      expeditedPricePerUnit: item.expedited_price_per_unit || "",
+      expeditedLeadTimeDays: item.expedited_lead_time_days || "",
       priceTiers: (item.price_tiers || []).map((tier) => ({
         rowId: crypto.randomUUID(),
         minQuantity: tier.minQuantity,
@@ -488,6 +496,34 @@ export function SellerListings({ membership }) {
             tiers={input.priceTiers}
             onChange={(priceTiers) => setInput({ ...input, priceTiers })}
           />
+          <fieldset className="tier-editor">
+            <legend>Urgent order option (optional)</legend>
+            <p>
+              Let Buyers reserve this material separately at a higher price. The
+              fulfillment clock starts after verified payment.
+            </p>
+            <FormField
+              label="Urgent price per unit in PKR"
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={input.expeditedPricePerUnit}
+              onChange={(e) =>
+                setInput({ ...input, expeditedPricePerUnit: e.target.value })
+              }
+            />
+            <FormField
+              label="Urgent turnaround in days (1–30)"
+              type="number"
+              step="1"
+              min="1"
+              max="30"
+              value={input.expeditedLeadTimeDays}
+              onChange={(e) =>
+                setInput({ ...input, expeditedLeadTimeDays: e.target.value })
+              }
+            />
+          </fieldset>
           <label className="field listing-description">
             <span>Description (at least 20 characters)</span>
             <textarea

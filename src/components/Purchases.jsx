@@ -42,6 +42,7 @@ export function ListingPurchaseActions({
   groupOnly = false,
 }) {
   const [quantity, setQuantity] = useState("");
+  const [fulfilmentPriority, setFulfilmentPriority] = useState("standard");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -63,12 +64,16 @@ export function ListingPurchaseActions({
           listingId: listing.id,
           quantity,
           requestKey: key(),
+          fulfilmentPriority:
+            !directEnabled && urgentEnabled ? "expedited" : fulfilmentPriority,
         }),
       });
       setNotice(
-        "Order placed. Seller response is due " +
-          when(order.seller_response_due_at) +
-          ".",
+        order.fulfilment_priority === "expedited"
+          ? `Urgent order placed at ${cash(order.unit_price_minor)} per ${order.unit}. Seller response is due ${when(order.seller_response_due_at)}. The ${order.fulfilment_lead_time_days}-day fulfillment clock starts after payment is verified.`
+          : "Order placed. Seller response is due " +
+              when(order.seller_response_due_at) +
+              ".",
       );
       setQuantity("");
     } catch (failure) {
@@ -103,6 +108,13 @@ export function ListingPurchaseActions({
   }
   const directEnabled =
     !groupOnly && ["direct", "both"].includes(listing.purchase_mode);
+  const urgentEnabled =
+    !groupOnly && Boolean(listing.expedited_price_per_unit_minor);
+  const urgentOrderSelected =
+    fulfilmentPriority === "expedited" || (!directEnabled && urgentEnabled);
+  let orderButtonLabel = "Request direct purchase";
+  if (urgentOrderSelected) orderButtonLabel = "Request urgent order";
+  if (busy) orderButtonLabel = "Placing order…";
   const groupEnabled = ["group", "both"].includes(listing.purchase_mode);
   return (
     <section
@@ -111,8 +123,30 @@ export function ListingPurchaseActions({
       {!groupOnly && <p className="eyebrow">Buying options</p>}
       <h2>{groupOnly ? "Open group orders" : "Purchase this material"}</h2>
       {!context && <p>Sign in as a Buyer to place an order or join a group.</p>}
-      {context && directEnabled && (
+      {context && (directEnabled || urgentEnabled) && (
         <form className="purchase-form" onSubmit={direct}>
+          {directEnabled && urgentEnabled && (
+            <label className="field">
+              <span>Order speed</span>
+              <select
+                value={fulfilmentPriority}
+                onChange={(event) => setFulfilmentPriority(event.target.value)}
+              >
+                <option value="standard">Standard price and timing</option>
+                <option value="expedited">
+                  Urgent · {cash(listing.expedited_price_per_unit_minor)} per{" "}
+                  {listing.unit} · {listing.expedited_lead_time_days} days
+                </option>
+              </select>
+            </label>
+          )}
+          {!directEnabled && urgentEnabled && (
+            <p className="notice">
+              Urgent order · {cash(listing.expedited_price_per_unit_minor)} per{" "}
+              {listing.unit} · Seller's {listing.expedited_lead_time_days}-day
+              fulfillment turnaround starts after verified payment.
+            </p>
+          )}
           <label className="field">
             <span>Quantity ({listing.unit})</span>
             <input
@@ -126,10 +160,10 @@ export function ListingPurchaseActions({
             />
           </label>
           <button className="button" disabled={busy}>
-            {busy ? "Placing order…" : "Request direct purchase"}
+            {orderButtonLabel}
           </button>
           <small>
-            Seller confirms first. If confirmed, you have 3 days to pay.
+            Seller confirms first. If confirmed, you have 48 hours to pay.
           </small>
         </form>
       )}
@@ -303,6 +337,15 @@ export function BuyerPurchases() {
             <p>
               {order.quantity} {order.unit} · {cash(order.total_minor)}
             </p>
+            {order.fulfilment_priority === "expedited" && (
+              <p className="notice">
+                Urgent order · Seller turnaround:{" "}
+                {order.fulfilment_lead_time_days} days
+                {order.fulfilment_due_at
+                  ? ` · fulfillment due ${when(order.fulfilment_due_at)}`
+                  : " · clock starts after verified payment"}
+              </p>
+            )}
             <OrderLifecycle order={order} onChanged={orders.reload} />
             {order.group_id && <p>Group status: {label(order.group_status)}</p>}
             {order.status === "pending_seller_confirmation" && (
@@ -470,7 +513,7 @@ export function SellerOrders({ membership }) {
     <section className="purchase-panel">
       <p className="eyebrow">Seller workspace</p>
       <h2>Orders and group purchases</h2>
-      <p>Confirm direct orders and groups. Buyers then have 3 days to pay.</p>
+      <p>Confirm direct orders and groups. Buyers then have 48 hours to pay.</p>
       {notice && (
         <div className="notice notice--success" role="status">
           {notice}
@@ -526,6 +569,14 @@ export function SellerOrders({ membership }) {
             {order.status === "pending_payment" && (
               <p>Buyer payment due {when(order.payment_due_at)}.</p>
             )}
+            {order.fulfilment_priority === "expedited" && (
+              <p>
+                Urgent fulfillment · {order.fulfilment_lead_time_days} days
+                {order.fulfilment_due_at
+                  ? ` · due ${when(order.fulfilment_due_at)}`
+                  : " · clock starts after verified payment"}
+              </p>
+            )}
             {mayDecide && order.status === "pending_seller_confirmation" && (
               <div className="purchase-actions-row">
                 <button
@@ -539,7 +590,7 @@ export function SellerOrders({ membership }) {
                         order.id +
                         "/decision",
                       { decision: "confirm" },
-                      "Order confirmed. Buyer has 3 days to pay.",
+                      "Order confirmed. Buyer has 48 hours to pay.",
                     )
                   }
                 >
@@ -611,7 +662,7 @@ export function SellerOrders({ membership }) {
                           group.id +
                           "/decision",
                         { decision: "confirm" },
-                        "Group confirmed. Buyers have 3 days to pay.",
+                        "Group confirmed. Buyers have 48 hours to pay.",
                       )
                     }
                   >
@@ -639,7 +690,7 @@ export function SellerOrders({ membership }) {
                 </div>
               )}
               {group.status === "payment_open" && (
-                <p>Buyer payments are due within 3 days of confirmation.</p>
+                <p>Buyer payments are due within 48 hours of confirmation.</p>
               )}
             </article>
           );
