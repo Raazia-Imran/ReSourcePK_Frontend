@@ -81,7 +81,7 @@ function StateMessage({ loading, error, empty, onRetry }) {
   return null;
 }
 
-function StatGrid({ items, showDetails = true }) {
+function StatGrid({ items, showDetails = false }) {
   return (
     <div className="data-stat-grid">
       {items.map(([label, value, detail]) => (

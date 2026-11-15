@@ -3549,3 +3549,26 @@ footer,
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Currency stays intact in cards, listing details and price tiers. */
+.money-value {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  font-variant-numeric: tabular-nums;
+}
+.data-stat {
+  container-type: inline-size;
+}
+@supports (font-size: 1cqi) {
+  .data-stat > strong {
+    font-size: clamp(1rem, 10cqi, 1.8rem);
+  }
+}
+.reviewer-invite-form > .field {
+  padding-top: 0;
+}
+.catalog-card > strong {
+  font-size: 1rem;
+  line-height: 1.5;
+}
