@@ -637,13 +637,9 @@ function WorkspaceContent({ active, kind, membership, context, refresh }) {
         <i />
       </div>
       <div>
-        <p className="eyebrow">Live data only</p>
+        <p className="eyebrow">Activity</p>
         <h3>Your activity will build this view.</h3>
-        <p>
-          No fabricated numbers are shown. Date filters, charts and downloadable
-          reports will populate from completed marketplace events in the
-          analytics phase.
-        </p>
+        <p>No activity to display yet.</p>
       </div>
     </div>
   );
@@ -749,10 +745,7 @@ function PlatformReviewers({ context }) {
       <div className="reviewer-admin-intro">
         <p className="eyebrow">Platform access</p>
         <h2>Manage Reviewers</h2>
-        <p>
-          Invite trusted reviewers and give each only the review access they
-          need. You can change permissions or revoke access at any time.
-        </p>
+        <p>Invite reviewers and choose their permissions.</p>
       </div>
       <form className="reviewer-invite-form" onSubmit={invite}>
         <label className="field">
@@ -940,10 +933,8 @@ function TeamAccess({ membership }) {
         <p className="eyebrow">Controlled delegation</p>
         <h3>Invite a teammate</h3>
         <p>
-          Invitations are email-bound, single-use and expire after 72 hours. The
-          Owners can invite Managers and Staff. Managers can invite Staff only
-          when the Owner grants that permission. Assign Staff access to view or
-          manage listings here; the API enforces these permissions.
+          Choose a role and permissions for your teammate. Invitations expire
+          after 72 hours.
         </p>
       </div>
       <form onSubmit={submit}>

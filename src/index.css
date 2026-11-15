@@ -3418,3 +3418,134 @@ footer,
     margin-bottom: 14px;
   }
 }
+
+/* Keep workspace cards sized by their available panel width. */
+.data-stat-grid,
+.metric-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 14px;
+}
+.data-stat,
+.metric {
+  min-width: 0;
+  padding: 20px;
+  align-content: start;
+  gap: 10px;
+}
+.data-stat > strong,
+.metric > strong {
+  display: block;
+  max-width: 100%;
+  margin: 0;
+  font-size: clamp(1.3rem, 1.8vw, 1.8rem);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: nowrap;
+}
+.data-stat > span,
+.metric > span {
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+.data-stat > small,
+.metric > small {
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+.commerce-metrics {
+  display: grid;
+  gap: 20px;
+}
+.commerce-metrics .data-page-heading h2 {
+  font-size: clamp(1.45rem, 2.3vw, 2rem);
+}
+.commerce-metrics details {
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.commerce-metrics summary {
+  cursor: pointer;
+  color: var(--violet);
+  font-weight: 700;
+}
+.metric-definitions {
+  display: grid;
+  gap: 12px;
+}
+.metric-definitions dt {
+  font-weight: 700;
+}
+.metric-definitions dd {
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+.reviewer-invite-form {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+.reviewer-invite-form > .field {
+  padding-top: 8px;
+}
+.reviewer-invite-form > .button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+.reviewer-admin-intro h2 {
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+}
+.reviewer-admin-intro p {
+  margin-bottom: 0;
+}
+.data-page-heading .button,
+.data-panel-heading .button {
+  flex-shrink: 0;
+}
+:where(.team-panel, .reviewer-admin, .data-panel, .purchase-panel) {
+  min-width: 0;
+}
+:where(.team-member-row, .purchase-card, .data-panel-heading) {
+  overflow-wrap: break-word;
+}
+@media (max-width: 650px) {
+  .reviewer-invite-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reviewer-invite-form > .field {
+    padding-top: 0;
+  }
+  .reviewer-invite-form > .button {
+    width: 100%;
+    justify-self: stretch;
+  }
+  .data-stat-grid,
+  .metric-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .data-stat,
+  .metric {
+    padding: 18px;
+  }
+  .data-stat > strong,
+  .metric > strong {
+    font-size: 1.65rem;
+  }
+}
+
+.stat-quantity {
+  display: block;
+  white-space: nowrap;
+}
+.team-panel {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(20px, 3vw, 44px);
+}
+.team-panel h3 {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+@media (max-width: 1100px) {
+  .team-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -39,7 +39,7 @@ export default function PaymentReturn() {
 
   let title = "Confirming your payment";
   let message =
-    "RapidGateway is confirming the result. This page updates when the signed payment notification reaches us.";
+    "RapidGateway is confirming the result. This page updates when your payment is confirmed.";
   if (!attemptId) {
     title = "Payment link is incomplete";
     message =
