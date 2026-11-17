@@ -187,7 +187,10 @@ export function Discovery() {
                 {item.unit}
               </p>
               <strong>
-                {price(item.price_per_unit)} / {item.unit}
+                <span className="money-value">
+                  {price(item.price_per_unit)}
+                </span>{" "}
+                / {item.unit}
               </strong>
               <details>
                 <summary>See details</summary>

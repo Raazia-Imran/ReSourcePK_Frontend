@@ -93,14 +93,20 @@ export default function ListingDetail() {
           </div>
           <div>
             <dt>Base price per {listing.unit}</dt>
-            <dd>{formatCurrency(listing.price_per_unit)}</dd>
+            <dd>
+              <span className="money-value">
+                {formatCurrency(listing.price_per_unit)}
+              </span>
+            </dd>
           </div>
           {listing.expedited_price_per_unit && (
             <div>
               <dt>Urgent order</dt>
               <dd>
-                {formatCurrency(listing.expedited_price_per_unit)} per{" "}
-                {listing.unit}
+                <span className="money-value">
+                  {formatCurrency(listing.expedited_price_per_unit)}
+                </span>{" "}
+                per {listing.unit}
                 {" · "}
                 {listing.expedited_lead_time_days}-day turnaround after verified
                 payment

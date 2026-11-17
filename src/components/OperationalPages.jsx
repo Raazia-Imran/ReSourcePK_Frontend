@@ -9,8 +9,12 @@ const readable = (value) => String(value || "—").replaceAll("_", " ");
 const date = (value) => (value ? new Date(value).toLocaleDateString() : "—");
 const quantityByUnit = (values = []) =>
   values.length
-    ? values.map((item) => `${item.quantity} ${item.unit}`).join(" · ")
-    : "No recorded quantity";
+    ? values.map((item) => (
+        <span className="stat-quantity" key={item.unit}>
+          {item.quantity} {item.unit}
+        </span>
+      ))
+    : "0";
 
 function useRemoteData(path) {
   const [result, setResult] = useState({ path: "", revision: -1 });
@@ -44,7 +48,7 @@ function PageHeading({ eyebrow, title, description, onRefresh, loading }) {
       <div>
         <p className="eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
-        <p>{description}</p>
+        {description && <p>{description}</p>}
       </div>
       {onRefresh && (
         <button
@@ -77,14 +81,14 @@ function StateMessage({ loading, error, empty, onRetry }) {
   return null;
 }
 
-function StatGrid({ items }) {
+function StatGrid({ items, showDetails = false }) {
   return (
     <div className="data-stat-grid">
       {items.map(([label, value, detail]) => (
         <article className="data-stat" key={label}>
           <span>{label}</span>
           <strong>{value ?? "—"}</strong>
-          {detail && <small>{detail}</small>}
+          {showDetails && detail && <small>{detail}</small>}
         </article>
       ))}
     </div>
@@ -138,7 +142,7 @@ export function BuyerImpact() {
       <PageHeading
         eyebrow="Buyer activity"
         title="Purchases & material impact"
-        description="Track your orders and paid material volume from live marketplace records. Environmental diversion is only reported when verified impact data is available."
+        description="Track your orders and purchased material."
         onRefresh={remote.reload}
         loading={remote.loading}
       />
@@ -206,12 +210,64 @@ function CommerceMetrics({ organizationId }) {
     Number(denominator)
       ? `${((Number(numerator) / Number(denominator)) * 100).toFixed(1)}%`
       : "—";
+  const metrics = d
+    ? [
+        [
+          "Paid GMV",
+          cash(d.paid_gmv_minor),
+          "Gross order value with a successful payment record, including later refunds",
+        ],
+        [
+          "Average order value",
+          Number(d.paid_orders)
+            ? cash(Number(d.paid_gmv_minor) / Number(d.paid_orders))
+            : "—",
+          "Paid GMV ÷ paid orders",
+        ],
+        [
+          "Order payment rate",
+          rate(d.paid_orders, d.placed_orders),
+          "Paid orders ÷ placed orders",
+        ],
+        [
+          "Payment attempt success",
+          rate(d.successful_attempts, d.payment_attempts),
+          "Successful or later refunded attempts ÷ all attempts",
+        ],
+        [
+          "Repeat purchaser rate",
+          rate(d.repeat_customers, d.purchasing_customers),
+          "Buyers with two or more paid orders ÷ paying buyers in this period",
+        ],
+        ["Completed orders", d.completed_orders],
+        [
+          "Group funding rate",
+          rate(d.confirmed_groups, d.closed_groups),
+          "Paid groups ÷ groups that ended paid or expired",
+        ],
+        [
+          "Cancellation rate",
+          rate(d.cancelled_orders, d.placed_orders),
+          "Cancelled, rejected or expired orders ÷ placed orders",
+        ],
+        [
+          "Recorded refund rate",
+          rate(d.refunded_orders, d.paid_orders),
+          "Recorded refunded orders ÷ paid orders; includes simulations",
+        ],
+        [
+          "Recorded refunds",
+          cash(d.recorded_refund_minor),
+          "Recorded full order refund value; not proof of bank settlement",
+        ],
+      ]
+    : [];
   return (
-    <div className="data-panel">
+    <div className="data-panel commerce-metrics">
       <PageHeading
-        eyebrow="Last 30 days · UTC order cohort"
+        eyebrow="Last 30 days"
         title="Business performance"
-        description="Sample listings and buyers are excluded. Recorded payments may include sandbox activity."
+        description="Includes test payments; not settled revenue."
         onRefresh={remote.reload}
         loading={remote.loading}
       />
@@ -222,64 +278,24 @@ function CommerceMetrics({ organizationId }) {
       />
       {d && (
         <>
-          <StatGrid
-            items={[
-              [
-                "Paid GMV",
-                cash(d.paid_gmv_minor),
-                "Gross order value with a successful payment record, including later refunds",
-              ],
-              [
-                "Average order value",
-                Number(d.paid_orders)
-                  ? cash(Number(d.paid_gmv_minor) / Number(d.paid_orders))
-                  : "—",
-                "Paid GMV ÷ paid orders",
-              ],
-              [
-                "Order payment rate",
-                rate(d.paid_orders, d.placed_orders),
-                "Paid orders ÷ placed orders",
-              ],
-              [
-                "Payment attempt success",
-                rate(d.successful_attempts, d.payment_attempts),
-                "Successful or later refunded attempts ÷ all attempts",
-              ],
-              [
-                "Repeat purchaser rate",
-                rate(d.repeat_customers, d.purchasing_customers),
-                "Buyers with two or more paid orders ÷ paying buyers in this period",
-              ],
-              ["Completed orders", d.completed_orders],
-              [
-                "Group funding rate",
-                rate(d.confirmed_groups, d.closed_groups),
-                "Paid groups ÷ groups that ended paid or expired",
-              ],
-              [
-                "Cancellation rate",
-                rate(d.cancelled_orders, d.placed_orders),
-                "Cancelled, rejected or expired orders ÷ placed orders",
-              ],
-              [
-                "Recorded refund rate",
-                rate(d.refunded_orders, d.paid_orders),
-                "Recorded refunded orders ÷ paid orders; includes simulations",
-              ],
-              [
-                "Recorded refunds",
-                cash(d.recorded_refund_minor),
-                "Recorded full order refund value; not proof of bank settlement",
-              ],
-            ]}
-          />
-          <p className="form-hint">
-            {d.financialBasis}. Period: {date(d.period.from)} to{" "}
-            {date(d.period.to)} (end exclusive). No denominator means —.
-          </p>
+          <StatGrid items={metrics} showDetails={false} />
           <details>
-            <summary>Metrics that need more data</summary>
+            <summary>Metric definitions and reporting details</summary>
+            <p className="form-hint">
+              {d.financialBasis}. Period: {date(d.period.from)} to{" "}
+              {date(d.period.to)} (end exclusive). No denominator means —.
+            </p>
+
+            <dl className="metric-definitions">
+              {metrics
+                .filter(([, , detail]) => detail)
+                .map(([label, , detail]) => (
+                  <div key={label}>
+                    <dt>{label}</dt>
+                    <dd>{detail}</dd>
+                  </div>
+                ))}
+            </dl>
             <ul>
               {d.unavailable.map((item) => (
                 <li key={item.name}>
@@ -362,9 +378,9 @@ export function WorkspaceOverview({ kind, membership, context }) {
 
   const items = overviewMetrics(kind, remote.data);
   const description = {
-    buyer: "Your order activity from live marketplace records.",
-    organization: "Your listing and order activity. Sample stock is excluded.",
-    platform: "Platform operations from live, non-sample marketplace data.",
+    buyer: "Your recent orders and payments.",
+    organization: "Your listings and orders at a glance.",
+    platform: "Marketplace activity at a glance.",
   }[kind];
   return (
     <section className="data-page overview-data">
@@ -390,11 +406,6 @@ export function WorkspaceOverview({ kind, membership, context }) {
       />
       {remote.data && <StatGrid items={items} />}
       {kind === "platform" && <CommerceMetrics />}
-      <p className="form-hint">
-        {kind === "platform"
-          ? "Recorded payment states are operational counts, not settlement or revenue reporting."
-          : "Only data recorded by the marketplace is shown; no impact estimates are fabricated."}
-      </p>
     </section>
   );
 }
@@ -411,7 +422,7 @@ export function SellerAnalytics({ membership }) {
       <PageHeading
         eyebrow="Organization reporting"
         title="Seller analytics"
-        description="Live listing and order activity for this organization. Sample listings are excluded from these figures."
+        description="Track your listings, orders and material quantities."
         onRefresh={remote.reload}
         loading={remote.loading}
       />
@@ -476,10 +487,6 @@ export function SellerAnalytics({ membership }) {
                 ))}
               </div>
             )}
-            <p className="form-hint">
-              Recorded order and payment states only; this is not a settlement
-              or verified impact report.
-            </p>
           </div>
         </>
       )}
@@ -713,7 +720,7 @@ export function PlatformAnalytics() {
       <PageHeading
         eyebrow="Platform health"
         title="Platform analytics"
-        description="Operational counts from live accounts and non-sample marketplace activity. No synthetic seed activity is included in the totals."
+        description="Marketplace accounts, orders and activity."
         onRefresh={remote.reload}
         loading={remote.loading}
       />

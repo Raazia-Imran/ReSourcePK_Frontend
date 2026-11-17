@@ -74,7 +74,11 @@ export function PriceTiers({ tiers = [], unit }) {
           {tiers.map((tier) => (
             <tr key={tier.minQuantity}>
               <td>{tier.minQuantity}</td>
-              <td>{formatCurrency(tier.pricePerUnit)}</td>
+              <td>
+                <span className="money-value">
+                  {formatCurrency(tier.pricePerUnit)}
+                </span>
+              </td>
             </tr>
           ))}
         </tbody>
