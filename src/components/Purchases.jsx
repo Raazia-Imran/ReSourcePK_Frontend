@@ -8,11 +8,13 @@ const cash = (minor) => formatCurrency(Number(minor || 0) / 100);
 const when = (value) => (value ? new Date(value).toLocaleString() : "—");
 const label = (value) => String(value || "unknown").replaceAll("_", " ");
 const key = () => crypto.randomUUID();
-const closeDefault = () => {
-  const date = new Date(Date.now() + 86400000);
+const toLocalDateTime = (date) => {
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
   return date.toISOString().slice(0, 16);
 };
+const closeDefault = () => toLocalDateTime(new Date(Date.now() + 86400000));
+const closeMaximum = (days) =>
+  toLocalDateTime(new Date(Date.now() + Number(days || 7) * 86400000));
 
 function useData(loader) {
   const [data, setData] = useState(null);
@@ -266,10 +268,14 @@ export function ListingPurchaseActions({
                 </button>
               )}
               <label className="field">
-                <span>Join period ends</span>
+                <span>
+                  Join period ends (Seller maximum:{" "}
+                  {listing.max_group_join_days || 7} days)
+                </span>
                 <input
                   type="datetime-local"
                   min={closeDefault()}
+                  max={closeMaximum(listing.max_group_join_days)}
                   value={groupDeadline}
                   onChange={(event) => setGroupDeadline(event.target.value)}
                   required
@@ -345,7 +351,10 @@ function BuyerGroup({ group, signedIn, busy, onJoin }) {
           <strong>{group.organization_name}</strong>
           <span>{label(group.status)}</span>
         </div>
-        <small>Closes {when(group.closes_at)}</small>
+        <small>
+          Joining closes {when(group.closes_at)}; joined shares stay reserved
+          while the group resolves.
+        </small>
       </div>
       <p>
         {joined} / {group.target_quantity} {group.unit} joined · {remaining}{" "}

@@ -30,6 +30,7 @@ const emptyListing = {
   expeditedPricePerUnit: "",
   expeditedLeadTimeDays: "",
   expeditedMinOrderQuantity: "",
+  maxGroupJoinDays: 7,
 };
 const units = ["kg", "meter", "roll", "piece"];
 
@@ -361,6 +362,7 @@ export function SellerListings({ membership }) {
       expeditedPricePerUnit: item.expedited_price_per_unit || "",
       expeditedLeadTimeDays: item.expedited_lead_time_days || "",
       expeditedMinOrderQuantity: item.expedited_min_order_quantity || "",
+      maxGroupJoinDays: item.max_group_join_days || 7,
       priceTiers: (item.price_tiers || []).map((tier) => ({
         rowId: crypto.randomUUID(),
         minQuantity: tier.minQuantity,
@@ -495,6 +497,21 @@ export function SellerListings({ membership }) {
               onChange={(e) => setInput({ ...input, [key]: e.target.value })}
             />
           ))}
+          <label className="field">
+            <span>Maximum group joining period (days, up to 7)</span>
+            <input
+              type="number"
+              min="1"
+              max="7"
+              step="1"
+              value={input.maxGroupJoinDays}
+              onChange={(e) =>
+                setInput({ ...input, maxGroupJoinDays: Number(e.target.value) })
+              }
+              required
+            />
+            <small>Buyers can choose a group deadline within this limit.</small>
+          </label>
           <TierEditor
             tiers={input.priceTiers}
             onChange={(priceTiers) => setInput({ ...input, priceTiers })}
