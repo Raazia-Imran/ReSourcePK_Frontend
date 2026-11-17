@@ -1,0 +1,61 @@
+ReThread Frontend — Software Requirements
+========================================
+
+This project is implemented in JavaScript, not Python. This file is an
+inventory for developers; do not install it with pip. Use npm ci to install the
+exact dependency tree recorded in package-lock.json.
+
+RUNTIME
+-------
+Node.js: use Node.js 24 to match the backend; Vite 8 requires a supported
+modern Node.js release.
+npm: version shipped with the selected Node.js installation
+A modern web browser for using the application.
+
+RUNTIME DEPENDENCIES (package.json)
+-----------------------------------
+@fontsource-variable/bricolage-grotesque ^5.2.8
+@fontsource-variable/manrope ^5.2.8
+lucide-react ^0.468.0
+react ^18.2.0
+react-dom ^18.2.0
+react-router-dom ^7.18.4
+
+DEVELOPMENT AND BUILD DEPENDENCIES
+----------------------------------
+@eslint/js ^10.0.1
+@vitejs/plugin-react ^6.1.1
+eslint ^10.11.0
+eslint-plugin-react-hooks ^7.1.1
+eslint-plugin-sonarjs ^4.2.1
+globals ^17.12.0
+prettier 3.9.10
+vite ^8.3.0
+
+Install and run from the frontend repository root:
+npm ci
+npm run dev
+
+Build and quality checks:
+npm run build
+npm run lint
+npm run format:check
+
+ENVIRONMENT SETTINGS
+--------------------
+VITE_API_URL: backend API base URL, such as http://localhost:5000/api/v1.
+VITE_GOOGLE_CLIENT_ID: public Google OAuth Web client ID. Add each deployed
+frontend origin to the OAuth client's authorized JavaScript origins.
+These VITE_ values are included in the browser build. Never put passwords,
+private keys, webhook signing salts, or other backend secrets in frontend env.
+
+The frontend calls the separately deployed Node.js/Express backend. Configure
+VITE_API_URL for the deployment, and configure the backend CORS_ORIGINS and
+APP_URL values to allow the frontend's exact origin. Google sign-in also needs
+the matching OAuth origin and redirect setup.
+
+VERSIONING
+----------
+package-lock.json records the exact resolved dependency tree, including
+transitive packages. npm ci installs those locked versions. Update this file
+when package.json dependencies or runtime requirements change.
